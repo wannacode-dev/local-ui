@@ -24,7 +24,7 @@ function scanDirectory(dir: string): any[] {
       // Нашли файл задания
       try {
         const content = fs.readFileSync(fullPath, 'utf-8')
-        const relativePath = path.relative(path.join(process.cwd(), 'src'), fullPath)
+        const relativePath = path.relative(path.join(process.cwd(), '..', 'src'), fullPath)
         
         // Получаем имя темы (родительская директория)
         const pathParts = relativePath.split(path.sep)
@@ -56,7 +56,7 @@ function scanDirectory(dir: string): any[] {
 
 export async function GET() {
   try {
-    const srcPath = path.join(process.cwd(), 'src')
+    const srcPath = path.join(process.cwd(), '..', 'src')
     
     if (!fs.existsSync(srcPath)) {
       console.log('Директория src не найдена')
