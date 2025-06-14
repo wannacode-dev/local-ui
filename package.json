@@ -1,0 +1,27 @@
+{
+  "name": "react-tasks-nextjs",
+  "version": "1.0.0",
+  "description": "Интерактивные задания по React на Next.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@babel/standalone": "^7.23.5",
+    "framer-motion": "^12.16.0",
+    "lucide-react": "^0.514.0",
+    "next": "14.0.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.10.4",
+    "@types/react": "18.2.45",
+    "@types/react-dom": "18.2.18",
+    "eslint": "8.56.0",
+    "eslint-config-next": "14.0.4",
+    "typescript": "5.3.3"
+  }
+}
