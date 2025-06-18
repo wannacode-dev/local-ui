@@ -171,7 +171,55 @@ export async function GET(request: NextRequest) {
     })
     
     if (!file) {
-      return new NextResponse('File parameter is required', { status: 400 })
+      // Если файл не указан, возвращаем список файлов из папки src
+      try {
+        const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
+        const srcPath = path.join(projectRoot, 'src')
+        
+        console.log('Scanning src directory:', srcPath)
+        
+        // Проверяем существование папки src
+        await fs.access(srcPath)
+        
+        // Рекурсивно сканируем папку src
+        const scanDirectory = async (dirPath: string, relativePath: string = ''): Promise<any[]> => {
+          const items = await fs.readdir(dirPath, { withFileTypes: true })
+          const result: any[] = []
+          
+          for (const item of items) {
+            const itemPath = path.join(dirPath, item.name)
+            const relativeItemPath = path.join(relativePath, item.name).replace(/\\/g, '/')
+            
+            if (item.isDirectory()) {
+              // Рекурсивно сканируем подпапки
+              const children = await scanDirectory(itemPath, relativeItemPath)
+              result.push({
+                name: item.name,
+                type: 'directory',
+                path: relativeItemPath,
+                children: children
+              })
+            } else if (item.isFile() && (item.name.endsWith('.html') || item.name.endsWith('.js') || item.name.endsWith('.jsx'))) {
+              // Добавляем только файлы с нужными расширениями
+              result.push({
+                name: item.name,
+                type: 'file',
+                path: `src/${relativeItemPath}`
+              })
+            }
+          }
+          
+          return result
+        }
+        
+        const files = await scanDirectory(srcPath)
+        console.log('Found files:', files)
+        
+        return NextResponse.json({ files })
+      } catch (error) {
+        console.error('Error scanning src directory:', error)
+        return NextResponse.json({ files: [], error: 'Папка src не найдена' })
+      }
     }
 
     // Проверяем, не запрашивается ли API
