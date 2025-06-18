@@ -45,6 +45,7 @@ export default function Home() {
 
   const handleViewModeChange = (mode: 'problem' | 'solution') => {
     console.log('View mode changed:', { mode })
+    setViewMode(mode)
     const url = new URL(window.location.href)
     const currentTask = url.searchParams.get('task')
     if (currentTask) {
@@ -52,7 +53,7 @@ export default function Home() {
         ? currentTask.replace('.problem.', '.solution.')
         : currentTask.replace('.solution.', '.problem.')
       url.searchParams.set('task', newTask)
-      router.push(url.pathname + url.search)
+      router.push(url.pathname + url.search, { scroll: false })
     }
   }
 

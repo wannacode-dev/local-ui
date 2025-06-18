@@ -57,13 +57,14 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange }: Tas
         filePath = filePath.replace('.problem.', '.solution.')
       }
       
+      // Убираем лишний префикс src/, если он уже есть в пути
       filePath = filePath.replace(/^src\//, '')
       const normalizedPath = `src/${filePath}`
       
-      console.log('Loading content:', { filePath, viewMode })
+      console.log('Loading content:', { filePath, viewMode, normalizedPath })
       
       const timestamp = new Date().getTime()
-      const url = `/api/task?file=${encodeURIComponent(normalizedPath)}&t=${timestamp}`
+      const url = `/api/tasks?file=${encodeURIComponent(normalizedPath)}&t=${timestamp}`
       
       const response = await fetch(url)
       if (!response.ok) {
