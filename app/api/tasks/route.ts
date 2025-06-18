@@ -203,9 +203,10 @@ export async function GET(request: NextRequest) {
 
     console.log('Requested file:', file)
 
-    // Получаем абсолютный путь к файлу
-    const filePath = path.join(process.cwd(), file)
-    console.log('Full file path:', filePath, 'Current dir:', process.cwd())
+    // Получаем абсолютный путь к файлу с учетом структуры сабмодуля
+    const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
+    const filePath = path.join(projectRoot, file)
+    console.log('Full file path:', filePath, 'Project root:', projectRoot)
 
     try {
       // Проверяем существование файла
