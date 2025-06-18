@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { chapterTranslations } from '@/app/chapter-translations'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,61 @@ const MOCK_DATA: Record<string, unknown> = {
   'books/1': { id: 1, name: "React в действии", author: "Марк Тилен Томас", price: "2500 руб." },
   'books/2': { id: 2, name: "JavaScript: Подробное руководство", author: "Дэвид Флэнаган", price: "3200 руб." },
   'books/3': { id: 3, name: "CSS для профи", author: "Кит Грант", price: "1800 руб." }
+}
+
+// Функция для рекурсивного сканирования директории
+async function scanDirectory(dir: string): Promise<any[]> {
+  try {
+    await fs.access(dir)
+  } catch {
+    return []
+  }
+
+  const items = await fs.readdir(dir)
+  const tasks: any[] = []
+
+  for (const item of items) {
+    const fullPath = path.join(dir, item)
+    const stat = await fs.stat(fullPath)
+
+    if (stat.isDirectory()) {
+      // Рекурсивно проверяем все поддиректории
+      tasks.push(...await scanDirectory(fullPath))
+    } else if (item.includes('.problem.') && 
+              (item.endsWith('.html') || item.endsWith('.js') || item.endsWith('.jsx'))) {
+      // Нашли файл задания
+      try {
+        const content = await fs.readFile(fullPath, 'utf-8')
+        const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
+        const srcPath = path.join(projectRoot, 'src')
+        const relativePath = path.relative(srcPath, fullPath)
+        
+        // Получаем имя темы (родительская директория)
+        const pathParts = relativePath.split(path.sep)
+        const chapter = pathParts[0]
+        
+        // Извлекаем название задания (первая строка после "Задание:")
+        const nameMatch = content.match(/Задание:\s*([^\n]*)/);
+        const name = nameMatch ? nameMatch[1].trim() : item;
+        
+        // Извлекаем полное описание задания
+        const descMatch = content.match(/\/\*\s*Задание:[\s\S]*?\*\//) ||
+                        content.match(/<!--\s*Задание:[\s\S]*?-->/) ||
+                        [null, ''];
+
+        tasks.push({
+          name: name,
+          description: descMatch[0] || '',
+          file: relativePath.replace(/\\/g, '/'),
+          chapter: chapter
+        });
+      } catch (error) {
+        console.error(`Ошибка чтения файла в ${fullPath}:`, error);
+      }
+    }
+  }
+
+  return tasks
 }
 
 function extractContent(content: string): string {
@@ -171,54 +227,43 @@ export async function GET(request: NextRequest) {
     })
     
     if (!file) {
-      // Если файл не указан, возвращаем список файлов из папки src
+      // Если файл не указан, возвращаем список заданий (как в старой версии)
       try {
         const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
         const srcPath = path.join(projectRoot, 'src')
         
         console.log('Scanning src directory:', srcPath)
         
-        // Проверяем существование папки src
-        await fs.access(srcPath)
+        // Получаем все задания
+        const allTasks = await scanDirectory(srcPath)
+        console.log('Найдено заданий:', allTasks.length)
         
-        // Рекурсивно сканируем папку src
-        const scanDirectory = async (dirPath: string, relativePath: string = ''): Promise<any[]> => {
-          const items = await fs.readdir(dirPath, { withFileTypes: true })
-          const result: any[] = []
-          
-          for (const item of items) {
-            const itemPath = path.join(dirPath, item.name)
-            const relativeItemPath = path.join(relativePath, item.name).replace(/\\/g, '/')
-            
-            if (item.isDirectory()) {
-              // Рекурсивно сканируем подпапки
-              const children = await scanDirectory(itemPath, relativeItemPath)
-              result.push({
-                name: item.name,
-                type: 'directory',
-                path: relativeItemPath,
-                children: children
-              })
-            } else if (item.isFile() && (item.name.endsWith('.html') || item.name.endsWith('.js') || item.name.endsWith('.jsx'))) {
-              // Добавляем только файлы с нужными расширениями
-              result.push({
-                name: item.name,
-                type: 'file',
-                path: `src/${relativeItemPath}`
-              })
+        // Группируем задания по темам
+        const chapters: { [key: string]: any } = {}
+        allTasks.forEach(task => {
+          if (!chapters[task.chapter]) {
+            chapters[task.chapter] = {
+              chapter: chapterTranslations[task.chapter] || task.chapter,
+              originalChapter: task.chapter,
+              tasks: []
             }
           }
-          
-          return result
-        }
-        
-        const files = await scanDirectory(srcPath)
-        console.log('Found files:', files)
-        
-        return NextResponse.json({ files })
+          chapters[task.chapter].tasks.push({
+            name: task.name,
+            description: task.description,
+            file: task.file
+          })
+        })
+
+        // Преобразуем объект в массив и сортируем темы по оригинальным названиям
+        const result = Object.values(chapters)
+          .sort((a: any, b: any) => a.originalChapter.localeCompare(b.originalChapter))
+
+        console.log(`Найдено тем: ${result.length}`)
+        return NextResponse.json(result)
       } catch (error) {
-        console.error('Error scanning src directory:', error)
-        return NextResponse.json({ files: [], error: 'Папка src не найдена' })
+        console.error('Ошибка при сканировании заданий:', error)
+        return NextResponse.json({ error: 'Ошибка при сканировании заданий' }, { status: 500 })
       }
     }
 
