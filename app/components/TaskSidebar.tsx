@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, easeInOut } from 'framer-motion'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import type { Transition } from 'framer-motion'
 
 interface Task {
   name: string
@@ -20,12 +19,6 @@ interface TaskSidebarProps {
   tasks: Chapter[]
   onTaskSelect: (taskFile: string) => void
   selectedTask: string | null
-}
-
-const smoothTransition: Transition = {
-  type: "tween",
-  duration: 0.2,
-  ease: "easeOut"
 }
 
 export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskSidebarProps) {
@@ -346,7 +339,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                 <motion.span
                   className="chapter-icon"
                   animate={{ rotate: openChapter === chapterIndex ? 90 : 0 }}
-                  transition={{ type: "tween", duration: 0.2 }}
+                  transition={{ duration: 0.2, ease: easeInOut }}
                 >
                   <ChevronRight size={16} />
                 </motion.span>
@@ -358,7 +351,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                   rotate: openChapter === chapterIndex ? 5 : 0,
                   scale: openChapter === chapterIndex ? 1.05 : 1,
                 }}
-                transition={{ type: "tween", duration: 0.2 }}
+                transition={{ duration: 0.2, ease: easeInOut }}
               >
                 {openChapter === chapterIndex ? <FolderOpen size={16} /> : <Folder size={16} />}
               </motion.span>
@@ -371,7 +364,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  transition={{ duration: 0.2, ease: easeInOut }}
                 >
                   {chapter.tasks.map((task, taskIndex) => (
                     <motion.button
@@ -380,7 +373,11 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                       onClick={() => handleTaskSelect(task.file)}
                       initial={{ x: -10, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: taskIndex * 0.03 }}
+                      transition={{ 
+                        duration: 0.2,
+                        delay: taskIndex * 0.03,
+                        ease: easeInOut
+                      }}
                       whileHover={{ x: 2 }}
                       whileTap={{ scale: 0.98 }}
                     >
