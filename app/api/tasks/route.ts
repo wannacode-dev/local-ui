@@ -204,7 +204,7 @@ export async function GET(request: NextRequest) {
     console.log('Requested file:', file)
 
     // Получаем абсолютный путь к файлу
-    const filePath = path.join(process.cwd(), '..', file)
+    const filePath = path.join(process.cwd(), file)
     console.log('Full file path:', filePath, 'Current dir:', process.cwd())
 
     try {
