@@ -22,9 +22,9 @@ interface TaskSidebarProps {
 }
 
 const smoothTransition = {
-  type: 'tween',
+  type: 'tween' as const,
   duration: 0.2,
-  ease: 'easeOut'
+  ease: 'easeOut' as const
 }
 
 export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskSidebarProps) {
@@ -61,6 +61,18 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
 
   const handleTaskSelect = (taskFile: string) => {
     onTaskSelect(taskFile)
+  }
+
+  // Функция для проверки, является ли задание выбранным (учитывает problem/solution)
+  const isTaskSelected = (taskFile: string) => {
+    if (!selectedTask) return false
+    
+    // Нормализуем пути для сравнения (убираем .problem/.solution)
+    const normalizeTaskFile = (file: string) => {
+      return file.replace(/\.(problem|solution)\./, '.PLACEHOLDER.')
+    }
+    
+    return normalizeTaskFile(selectedTask) === normalizeTaskFile(taskFile)
   }
 
   return (
@@ -363,7 +375,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                   {chapter.tasks.map((task, taskIndex) => (
                     <motion.button
                       key={taskIndex}
-                      className={`task-button ${selectedTask === task.file ? 'selected' : ''}`}
+                      className={`task-button ${isTaskSelected(task.file) ? 'selected' : ''}`}
                       onClick={() => handleTaskSelect(task.file)}
                       initial={{ x: -10, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
