@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import type { Transition } from 'framer-motion'
 
 interface Task {
   name: string
@@ -21,10 +22,10 @@ interface TaskSidebarProps {
   selectedTask: string | null
 }
 
-const smoothTransition = {
-  type: 'tween' as const,
+const smoothTransition: Transition = {
+  type: "tween",
   duration: 0.2,
-  ease: 'easeOut' as const
+  ease: "easeOut"
 }
 
 export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskSidebarProps) {
@@ -345,7 +346,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                 <motion.span
                   className="chapter-icon"
                   animate={{ rotate: openChapter === chapterIndex ? 90 : 0 }}
-                  transition={smoothTransition}
+                  transition={{ type: "tween", duration: 0.2 }}
                 >
                   <ChevronRight size={16} />
                 </motion.span>
@@ -357,7 +358,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                   rotate: openChapter === chapterIndex ? 5 : 0,
                   scale: openChapter === chapterIndex ? 1.05 : 1,
                 }}
-                transition={smoothTransition}
+                transition={{ type: "tween", duration: 0.2 }}
               >
                 {openChapter === chapterIndex ? <FolderOpen size={16} /> : <Folder size={16} />}
               </motion.span>
@@ -370,7 +371,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: 'easeInOut' }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
                   {chapter.tasks.map((task, taskIndex) => (
                     <motion.button
