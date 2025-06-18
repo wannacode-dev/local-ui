@@ -1,429 +1,240 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
+import { promises as fs } from 'fs'
 import path from 'path'
-import { chapterTranslations } from '@/app/chapter-translations'
 
-// Функция для определения типа файла
-function getFileType(filePath: string, content: string): 'html' | 'jsx' | 'html-with-react' {
-  const ext = path.extname(filePath).toLowerCase()
-  
-  if (ext === '.jsx') {
-    return 'jsx'
-  }
-  
-  if (ext === '.html') {
-    // Проверяем, содержит ли HTML файл подключения React или использует React API
-    if (content.includes('react.development.js') || 
-        content.includes('react.production.js') ||
-        content.includes('React.') || 
-        content.includes('ReactDOM.')) {
-      return 'html-with-react'
-    }
-    return 'html'
-  }
-  
-  return 'html'
+export const dynamic = 'force-dynamic'
+
+// Моковые данные для заданий
+const MOCK_DATA: Record<string, unknown> = {
+  books: [
+    { id: 1, name: "React в действии" },
+    { id: 2, name: "JavaScript: Подробное руководство" },
+    { id: 3, name: "CSS для профи" }
+  ],
+  'books/1': { id: 1, name: "React в действии", author: "Марк Тилен Томас", price: "2500 руб." },
+  'books/2': { id: 2, name: "JavaScript: Подробное руководство", author: "Дэвид Флэнаган", price: "3200 руб." },
+  'books/3': { id: 3, name: "CSS для профи", author: "Кит Грант", price: "1800 руб." }
 }
 
-// Функция для создания HTML документа для JSX файлов
-function createJsxHtmlDocument(content: string, filePath: string): string {
-  console.log('Creating JSX HTML document for file:', filePath);
-  
-  // Заменяем localhost:3000 на относительные пути для API
-  let processedContent = content.replace(
-    /http:\/\/localhost:3000\/api\//g,
-    '/api/'
-  );
-  
-  // Заменяем React Fragments на React.Fragment для совместимости с Babel standalone
-  processedContent = processedContent.replace(
-    /<>\s*/g,
-    '<React.Fragment>'
-  ).replace(
-    /\s*<\/>/g,
-    '</React.Fragment>'
-  );
-  
-  // Заменяем optional chaining (?.) на логическое И (&&) для совместимости с Babel standalone
-  processedContent = processedContent.replace(
-    /(\w+)(\?\.)(\w+)/g,
-    '$1 && $1.$3'
-  );
-  
+function extractContent(content: string): string {
+  // Удаляем комментарии с заданием
+  content = content.replace(/\/\*\s*Задание:[\s\S]*?\*\//, '')
+  content = content.replace(/<!--\s*Задание:[\s\S]*?-->/, '')
+
+  // Если это HTML файл
+  if (content.includes('<!DOCTYPE html>') || content.includes('<html')) {
+    // Проверяем, использует ли файл React
+    const usesReact = content.includes('React.') || content.includes('ReactDOM.') || content.includes('text/babel') || content.includes('className=')
+    
+    if (usesReact) {
+      // Добавляем React библиотеки и Babel в head, если их нет
+      const scripts = `
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`
+      
+      // Вставляем скрипты перед закрывающим тегом </head>
+      if (!content.includes('react@18') || !content.includes('@babel/standalone')) {
+        content = content.replace('</head>', `${scripts}
+</head>`)
+      }
+
+      // Если есть обычный script без type="text/babel", добавляем его
+      content = content.replace(/<script>(\s*const\s+\w+\s*=\s*<[^>]*>)/g, '<script type="text/babel">$1')
+    }
+    
+    return content
+  }
+
+  // Для JS/JSX файлов создаем HTML обертку
   return `
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>React Task</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
-        #root {
-            background: white;
+        
+        button {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            cursor: pointer;
+            margin: 4px;
+        }
+        button:hover {
+            background: #f1f5f9;
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+
+        .task-error {
+            padding: 16px;
+            margin: 16px 0;
             border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            min-height: 200px;
+            background: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fca5a5;
         }
-        .error-boundary {
-            color: red;
-            padding: 20px;
-            border: 2px solid red;
+        .task-warning {
+            padding: 16px;
+            margin: 16px 0;
             border-radius: 8px;
-            background: #ffebee;
-            margin: 10px 0;
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fcd34d;
         }
-        .error-boundary h3 {
-            margin-top: 0;
-        }
-        .error-boundary pre {
-            background: rgba(0,0,0,0.1);
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
+        .task-success {
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 8px;
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script>
-      // Глобальная обработка ошибок
-      window.addEventListener('error', function(event) {
-        console.error('Global error:', event.error);
-        const root = document.getElementById('root');
-        if (root && root.innerHTML.indexOf('error-boundary') === -1) {
-          root.innerHTML = '<div class="error-boundary">' + 
-            '<h3>Ошибка выполнения:</h3>' + 
-            '<pre>' + event.error.message + '</pre>' + 
-            '</div>';
-        }
-      });
-      
-      // Обработка ошибок в промисах
-      window.addEventListener('unhandledrejection', function(event) {
-        console.error('Unhandled promise rejection:', event.reason);
-        const root = document.getElementById('root');
-        if (root && root.innerHTML.indexOf('error-boundary') === -1) {
-          var message = event.reason && event.reason.message ? event.reason.message : event.reason;
-          root.innerHTML = '<div class="error-boundary">' + 
-            '<h3>Ошибка в промисе:</h3>' + 
-            '<pre>' + message + '</pre>' + 
-            '</div>';
-        }
-      });
+        // Мок для fetch API
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+            // Проверяем запрос к списку книг
+            if (url === 'http://localhost:3000/api/books') {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve(${JSON.stringify(MOCK_DATA.books)})
+                });
+            }
+            
+            // Проверяем запрос к конкретной книге
+            const bookMatch = url.match(/http:\/\/localhost:3000\/api\/books\/(\d+)$/);
+            if (bookMatch) {
+                const bookId = bookMatch[1];
+                const bookData = ${JSON.stringify(MOCK_DATA)}['books/' + bookId];
+                if (bookData) {
+                    return Promise.resolve({
+                        ok: true,
+                        json: () => Promise.resolve(bookData)
+                    });
+                }
+                return Promise.resolve({
+                    ok: false,
+                    status: 404,
+                    statusText: 'Book not found'
+                });
+            }
+            
+            return originalFetch(url, options);
+        };
+
+        // Обработка ошибок React
+        window.addEventListener('error', function(event) {
+            const root = document.getElementById('root');
+            root.innerHTML = '<div class="task-error"><strong>Ошибка:</strong><br/>' + event.error?.message + '</div>';
+        });
     </script>
-    
     <script type="text/babel">
-      try {
-        ${processedContent}
-      } catch (error) {
-        console.error('Sync error:', error);
-        const root = document.getElementById('root');
-        root.innerHTML = '<div class="error-boundary">' + 
-          '<h3>Ошибка выполнения:</h3>' + 
-          '<pre>' + error.message + '</pre>' + 
-          '</div>';
-      }
+        ${content}
     </script>
 </body>
-</html>
-`.trim();
-}
-
-// Функция для создания HTML документа для HTML файлов с React
-function createHtmlWithReactDocument(content: string, filePath: string): string {
-  console.log('Processing HTML with React document for file:', filePath);
-  
-  // Заменяем localhost:3000 на относительные пути для API
-  let processedContent = content.replace(
-    /http:\/\/localhost:3000\/api\//g,
-    '/api/'
-  );
-  
-  // Заменяем React Fragments на React.Fragment для совместимости с Babel standalone
-  processedContent = processedContent.replace(
-    /<>\s*/g,
-    '<React.Fragment>'
-  ).replace(
-    /\s*<\/>/g,
-    '</React.Fragment>'
-  );
-  
-  // Заменяем optional chaining (?.) на логическое И (&&) для совместимости с Babel standalone
-  processedContent = processedContent.replace(
-    /(\w+)(\?\.)(\w+)/g,
-    '$1 && $1.$3'
-  );
-  
-  // Всегда добавляем скрипты React если их нет
-  if (!processedContent.includes('react.development.js') && !processedContent.includes('react.production.js')) {
-    // Ищем место для вставки скриптов - после title или перед закрывающим head
-    if (processedContent.includes('</title>')) {
-      processedContent = processedContent.replace(
-        '</title>',
-        `</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>`
-      );
-    } else {
-      processedContent = processedContent.replace(
-        '</head>',
-        `    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-</head>`
-      );
-    }
-  }
-  
-  // Добавляем type="text/babel" к скриптам, которые используют JSX или React
-  processedContent = processedContent.replace(
-    /<script(?![^>]*src=)([^>]*)>/g,
-    function(match, attributes) {
-      // Проверяем содержимое скрипта между тегами
-      const scriptStart = processedContent.indexOf(match);
-      const scriptEnd = processedContent.indexOf('</script>', scriptStart);
-      const scriptContent = processedContent.substring(scriptStart + match.length, scriptEnd);
-      
-      // Если скрипт содержит JSX или React API, добавляем type="text/babel"
-      if (scriptContent.includes('React.') || scriptContent.includes('ReactDOM.') || scriptContent.includes('<')) {
-        if (!attributes.includes('type=')) {
-          return '<script type="text/babel"' + attributes + '>';
-        }
-      }
-      return match;
-    }
-  );
-  
-  return processedContent;
-}
-
-// Функция для создания обычного HTML документа
-function createSimpleHtmlDocument(content: string, filePath: string): string {
-  console.log('Processing simple HTML document for file:', filePath);
-  
-  // Проверяем, использует ли файл React
-  const usesReact = content.includes('React.') || content.includes('ReactDOM.');
-  
-  if (usesReact) {
-    // Обрабатываем как HTML с React
-    return createHtmlWithReactDocument(content, filePath);
-  }
-  
-  return content;
-}
-
-// Основная функция для создания HTML документа
-function createHtmlDocument(content: string, filePath: string): string {
-  const fileType = getFileType(filePath, content);
-  
-  console.log('File type detected:', fileType, 'for file:', filePath);
-  
-  switch (fileType) {
-    case 'jsx':
-      return createJsxHtmlDocument(content, filePath);
-    case 'html-with-react':
-      return createHtmlWithReactDocument(content, filePath);
-    case 'html':
-    default:
-      return createSimpleHtmlDocument(content, filePath);
-  }
-}
-
-// Функция для проверки существования файла
-function findFile(baseDir: string, targetPath: string): string | null {
-  console.log('Finding file:', { baseDir, targetPath });
-  
-  // Пробуем разные варианты путей
-  const possiblePaths = [
-    path.join(baseDir, targetPath),
-    path.join(baseDir, 'src', targetPath),
-    path.join(baseDir, targetPath.replace(/^src\//, '')),
-    targetPath
-  ];
-
-  for (const filePath of possiblePaths) {
-    console.log('Checking path:', filePath);
-    if (fs.existsSync(filePath)) {
-      console.log('Found file at:', filePath);
-      return filePath;
-    }
-  }
-
-  console.log('File not found in any location');
-  return null;
-}
-
-// Функция для рекурсивного сканирования директории
-function scanDirectory(dir: string): any[] {
-  console.log('Scanning directory:', dir);
-  
-  if (!fs.existsSync(dir)) {
-    console.log('Directory does not exist:', dir);
-    return [];
-  }
-
-  const items = fs.readdirSync(dir);
-  const tasks: any[] = [];
-
-  for (const item of items) {
-    const fullPath = path.join(dir, item);
-    const stat = fs.statSync(fullPath);
-
-    if (stat.isDirectory()) {
-      tasks.push(...scanDirectory(fullPath));
-    } else if (item.includes('.problem.') || item.includes('.solution.')) {
-      try {
-        const content = fs.readFileSync(fullPath, 'utf-8');
-        const relativePath = path.relative(path.join(process.cwd(), '..', 'src'), fullPath);
-        
-        const pathParts = relativePath.split(path.sep);
-        const chapter = pathParts[0];
-        
-        // Улучшенное извлечение названия задания
-        let name = item;
-        let description = '';
-        
-        // Для HTML файлов ищем в комментариях
-        if (item.endsWith('.html')) {
-          const htmlNameMatch = content.match(/<!--\s*Задание:\s*([^\n]*)/);
-          const htmlDescMatch = content.match(/<!--\s*Задание:[\s\S]*?-->/);
-          
-          if (htmlNameMatch) {
-            name = htmlNameMatch[1].trim();
-          }
-          if (htmlDescMatch) {
-            description = htmlDescMatch[0];
-          }
-        }
-        
-        // Для JSX файлов ищем в комментариях JS
-        if (item.endsWith('.jsx')) {
-          const jsxNameMatch = content.match(/\/\*\s*Задание:\s*([^\n]*)/);
-          const jsxDescMatch = content.match(/\/\*\s*Задание:[\s\S]*?\*\//);
-          
-          if (jsxNameMatch) {
-            name = jsxNameMatch[1].trim();
-          }
-          if (jsxDescMatch) {
-            description = jsxDescMatch[0];
-          }
-        }
-        
-        // Если название не найдено, используем название файла
-        if (name === item) {
-          name = item.replace(/\.(problem|solution)\.(html|jsx)$/, '').replace(/-/g, ' ');
-        }
-
-        tasks.push({
-          name: name,
-          description: description,
-          file: relativePath.replace(/\\/g, '/'),
-          chapter: chapter,
-          type: item.endsWith('.jsx') ? 'jsx' : 'html'
-        });
-      } catch (error) {
-        console.error(`Ошибка чтения файла в ${fullPath}:`, error);
-      }
-    }
-  }
-
-  return tasks;
+</html>`
 }
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const file = searchParams.get('file');
-
-  if (file) {
-    try {
-      console.log('Requested file:', file);
-      
-      // Получаем базовую директорию проекта
-      const baseDir = path.resolve(process.cwd(), '..');
-      console.log('Base directory:', baseDir);
-      
-      // Ищем файл в разных местах
-      const filePath = findFile(baseDir, file);
-      
-      if (!filePath) {
-        console.error('File not found:', file);
-        return NextResponse.json({ 
-          error: 'File not found',
-          searchedIn: baseDir,
-          requestedFile: file
-        }, { status: 404 });
-      }
-
-      // Читаем содержимое файла
-      const content = fs.readFileSync(filePath, 'utf-8');
-      console.log('File content length:', content.length);
-      
-      // Создаем HTML документ
-      const htmlContent = createHtmlDocument(content, filePath);
-      
-      return new NextResponse(htmlContent, {
-        headers: {
-          'Content-Type': 'text/html',
-          'Cache-Control': 'no-store, must-revalidate',
-        },
-      });
-    } catch (error) {
-      console.error('Error processing file:', error);
-      return NextResponse.json({ 
-        error: 'Error reading file',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      }, { status: 500 });
-    }
-  }
-
   try {
-    const srcPath = path.join(process.cwd(), '..', 'src');
-    console.log('Scanning source directory:', srcPath);
+    const searchParams = request.nextUrl.searchParams
+    const file = searchParams.get('file')
     
-    if (!fs.existsSync(srcPath)) {
-      console.log('Source directory not found:', srcPath);
-      return NextResponse.json([]);
+    console.log('API Request:', {
+      url: request.url,
+      file: file,
+      cwd: process.cwd(),
+      parentDir: path.join(process.cwd(), '..')
+    })
+    
+    if (!file) {
+      return new NextResponse('File parameter is required', { status: 400 })
     }
 
-    const allTasks = scanDirectory(srcPath);
-    console.log('Found tasks:', allTasks.length);
-    
-    const chapters: { [key: string]: any } = {};
-    allTasks.forEach(task => {
-      if (!chapters[task.chapter]) {
-        chapters[task.chapter] = {
-          chapter: chapterTranslations[task.chapter] || task.chapter,
-          originalChapter: task.chapter,
-          tasks: []
-        };
+    // Проверяем, не запрашивается ли API
+    if (file.includes('/api/')) {
+      const endpoint = file.split('/api/')[1].replace(/\/$/, '') // Убираем trailing slash
+
+      // Проверяем запрос к конкретной книге
+      const booksMatch = endpoint.match(/^books\/(\d+)$/)
+      if (booksMatch) {
+        const bookId = booksMatch[1]
+        const bookData = MOCK_DATA[`books/${bookId}`]
+        if (bookData) {
+          return NextResponse.json(bookData)
+        }
+        return new NextResponse('Book not found', { status: 404 })
       }
-      chapters[task.chapter].tasks.push({
-        name: task.name,
-        description: task.description,
-        file: task.file
-      });
-    });
 
-    const result = Object.values(chapters)
-      .sort((a: any, b: any) => a.originalChapter.localeCompare(b.originalChapter));
+      // Проверяем запрос к списку книг
+      if (endpoint === 'books') {
+        return NextResponse.json(MOCK_DATA.books)
+      }
+      
+      // Проверяем другие API endpoints
+      if (endpoint in MOCK_DATA) {
+        return NextResponse.json(MOCK_DATA[endpoint])
+      }
+      return new NextResponse('API endpoint not found', { status: 404 })
+    }
 
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error('Error scanning tasks:', error);
-    return NextResponse.json({ 
-      error: 'Error scanning tasks',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.log('Requested file:', file)
+
+    // Получаем абсолютный путь к файлу
+    const filePath = path.join(process.cwd(), '..', file)
+    console.log('Full file path:', filePath, 'Current dir:', process.cwd())
+
+    try {
+      // Проверяем существование файла
+      await fs.access(filePath)
+    } catch (error) {
+      console.error('File not found:', filePath)
+      return new NextResponse('File not found', { status: 404 })
+    }
+
+    // Читаем содержимое файла
+    const content = await fs.readFile(filePath, 'utf-8')
+    console.log('File content length:', content.length)
+
+    // Обрабатываем контент
+    const processedContent = extractContent(content)
+
+    // Устанавливаем заголовки для предотвращения кэширования
+    const headers = {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '-1',
+      'X-File-Path': filePath,
+      'X-Content-Length': processedContent.length.toString()
+    }
+
+    return new NextResponse(processedContent, { headers })
+  } catch (error: any) {
+    console.error('Error processing request:', error)
+    return new NextResponse(`Error reading file: ${error?.message || 'Unknown error'}`, { status: 500 })
   }
 } 
