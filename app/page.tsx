@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import TaskSidebar from './components/TaskSidebar'
 import TaskViewer from './components/TaskViewer'
 import { useSearchParams, useRouter } from 'next/navigation'
+import courseConfig from '../../../course.config'
 
 export default function Home() {
   const [selectedTask, setSelectedTask] = useState<string | null>(null)
@@ -66,8 +67,8 @@ export default function Home() {
       />
       <div className="main-content">
         <div className="header">
-          {/* <h1>📚 React для начинающих</h1> */}
-          <p>Интерактивное обучение React с Next.js</p>
+          <h1>{courseConfig.title}</h1>
+          <p>{courseConfig.description}</p>
         </div>
         <div className="content">
           {selectedTask ? (
