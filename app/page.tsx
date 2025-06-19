@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import TaskSidebar from './components/TaskSidebar'
 import TaskViewer from './components/TaskViewer'
 import { useSearchParams, useRouter } from 'next/navigation'
-import courseConfig from '../../../course.config'
+import courseConfig from './config/course'
 
 export default function Home() {
   const [selectedTask, setSelectedTask] = useState<string | null>(null)
