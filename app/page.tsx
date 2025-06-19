@@ -4,17 +4,24 @@ import { useState, useEffect } from 'react'
 import TaskSidebar from './components/TaskSidebar'
 import TaskViewer from './components/TaskViewer'
 import { useSearchParams, useRouter } from 'next/navigation'
-import courseConfig from './config/course'
+import { loadCourseConfig } from './config/course'
+import { CourseConfig } from './types/course'
 
 export default function Home() {
   const [selectedTask, setSelectedTask] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'problem' | 'solution'>('problem')
   const [tasks, setTasks] = useState<any[]>([])
+  const [courseConfig, setCourseConfig] = useState<CourseConfig>({
+    title: 'Загрузка...',
+    description: 'Загрузка курса...',
+    chapterTranslations: {}
+  })
   const router = useRouter()
   const searchParams = useSearchParams()
 
   useEffect(() => {
     loadTasks()
+    loadConfig()
   }, [])
 
   useEffect(() => {
@@ -34,6 +41,15 @@ export default function Home() {
       setTasks(data)
     } catch (error) {
       console.error('Ошибка загрузки заданий:', error)
+    }
+  }
+
+  const loadConfig = async () => {
+    try {
+      const config = await loadCourseConfig()
+      setCourseConfig(config)
+    } catch (error) {
+      console.error('Ошибка загрузки конфигурации:', error)
     }
   }
 

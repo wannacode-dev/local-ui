@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
-import { chapterTranslations } from '@/app/chapter-translations'
+import { loadServerConfig } from '@/app/lib/config-loader'
 
 // Функция для рекурсивного сканирования директории
 function scanDirectory(dir: string): any[] {
@@ -67,12 +67,15 @@ export async function GET() {
     const allTasks = scanDirectory(srcPath)
     console.log('Найдено заданий:', allTasks.length)
     
+    // Загружаем конфигурацию
+    const config = await loadServerConfig()
+    
     // Группируем задания по темам
     const chapters: { [key: string]: any } = {}
     allTasks.forEach(task => {
       if (!chapters[task.chapter]) {
         chapters[task.chapter] = {
-          chapter: chapterTranslations[task.chapter] || task.chapter,
+          chapter: config.chapterTranslations[task.chapter] || task.chapter,
           originalChapter: task.chapter,
           tasks: []
         }
