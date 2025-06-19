@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { loadServerConfig } from '@/app/lib/config-loader'
+import { loadServerConfig, clearServerConfigCache } from '@/app/lib/config-loader'
 
 export const dynamic = 'force-dynamic'
 
@@ -240,12 +240,19 @@ export async function GET(request: NextRequest) {
         
         // Группируем задания по темам
         const chapters: { [key: string]: any } = {}
+        
+        // Очищаем кэш для отладки
+        clearServerConfigCache()
         const config = await loadServerConfig()
+        
+        console.log('Loaded config:', JSON.stringify(config, null, 2))
         
         allTasks.forEach(task => {
           if (!chapters[task.chapter]) {
+            const translatedChapter = config.chapterTranslations[task.chapter] || task.chapter
+            console.log(`Chapter translation: ${task.chapter} -> ${translatedChapter}`)
             chapters[task.chapter] = {
-              chapter: config.chapterTranslations[task.chapter] || task.chapter,
+              chapter: translatedChapter,
               originalChapter: task.chapter,
               tasks: []
             }
