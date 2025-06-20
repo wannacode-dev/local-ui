@@ -50,7 +50,18 @@ async function scanDirectory(dir: string): Promise<any[]> {
         
         // Извлекаем название задания (первая строка после "Задание:")
         const nameMatch = content.match(/Задание:\s*([^\n]*)/);
-        const name = nameMatch ? nameMatch[1].trim() : item;
+        let name = nameMatch ? nameMatch[1].trim() : item;
+        
+        // Если название не найдено в комментарии, форматируем имя файла
+        if (!nameMatch) {
+          // Убираем номер, расширение и .problem/.solution
+          name = item
+            .replace(/^\d+-/, '') // убираем номер в начале
+            .replace(/\.(problem|solution)\..*$/, '') // убираем .problem/.solution и расширение
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+        }
         
         // Извлекаем полное описание задания
         const descMatch = content.match(/\/\*\s*Задание:[\s\S]*?\*\//) ||
