@@ -26,6 +26,18 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  // Функция для красивого форматирования названий тем
+  const formatChapterName = (chapterName: string): string => {
+    // Убираем номер в начале (например, "01-")
+    const withoutNumber = chapterName.replace(/^\d+-/, '')
+    
+    // Заменяем дефисы на пробелы и делаем первую букву каждого слова заглавной
+    return withoutNumber
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  }
+
   const updateURL = (chapterIndex: number | null) => {
     const url = new URL(window.location.href)
     
@@ -343,7 +355,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                 >
                   <ChevronRight size={16} />
                 </motion.span>
-                <span className="chapter-name">{chapter.chapter}</span>
+                <span className="chapter-name">{formatChapterName(chapter.chapter)}</span>
               </span>
               <motion.span
                 className="chapter-folder"
