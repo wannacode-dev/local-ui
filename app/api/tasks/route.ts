@@ -75,7 +75,7 @@ async function scanDirectory(dir: string): Promise<any[]> {
           chapter: chapter
         });
       } catch (error) {
-        console.error(`Ошибка чтения файла в ${fullPath}:`, error);
+        console.error(`⚠️   Ошибка чтения файла: ${path.basename(fullPath)}`);
       }
     }
   }
@@ -230,12 +230,13 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const file = searchParams.get('file')
     
-    console.log('API Request:', {
-      url: request.url,
-      file: file,
-      cwd: process.cwd(),
-      parentDir: path.join(process.cwd(), '..')
-    })
+    // Красивый вывод информации о запросе
+    console.log('\n🚀 ═══ API REQUEST ═══')
+    console.log(`📄  Файл: ${file || 'список заданий'}`)
+    if (file) {
+      const decodedFile = decodeURIComponent(file)
+      console.log(`🎯  Decoded: ${decodedFile}`)
+    }
     
     if (!file) {
       // Если файл не указан, возвращаем список заданий (как в старой версии)
@@ -243,11 +244,11 @@ export async function GET(request: NextRequest) {
         const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
         const srcPath = path.join(projectRoot, 'src')
         
-        console.log('Scanning src directory:', srcPath)
+        console.log(`📁  Сканируем директорию: ${srcPath}`)
         
         // Получаем все задания
         const allTasks = await scanDirectory(srcPath)
-        console.log('Найдено заданий:', allTasks.length)
+        console.log(`✅  Найдено заданий: ${allTasks.length}`)
         
         // Группируем задания по темам
         const chapters: { [key: string]: any } = {}
@@ -256,12 +257,12 @@ export async function GET(request: NextRequest) {
         clearServerConfigCache()
         const config = await loadServerConfig()
         
-        console.log('Loaded config:', JSON.stringify(config, null, 2))
+        console.log(`⚙️   Конфигурация загружена: ${config.title}`)
         
         allTasks.forEach(task => {
           if (!chapters[task.chapter]) {
             const translatedChapter = config.chapterTranslations[task.chapter] || task.chapter
-            console.log(`Chapter translation: ${task.chapter} -> ${translatedChapter}`)
+            console.log(`🔄  Глава: ${translatedChapter}`)
             chapters[task.chapter] = {
               chapter: translatedChapter,
               originalChapter: task.chapter,
@@ -279,10 +280,12 @@ export async function GET(request: NextRequest) {
         const result = Object.values(chapters)
           .sort((a: any, b: any) => a.originalChapter.localeCompare(b.originalChapter))
 
-        console.log(`Найдено тем: ${result.length}`)
+        console.log(`📚  Всего тем: ${result.length}`)
+        console.log('════════════════════════\n')
         return NextResponse.json(result)
       } catch (error) {
-        console.error('Ошибка при сканировании заданий:', error)
+        console.error(`💥  Ошибка при сканировании заданий: ${error}`)
+        console.error('════════════════════════\n')
         return NextResponse.json({ error: 'Ошибка при сканировании заданий' }, { status: 500 })
       }
     }
@@ -314,27 +317,30 @@ export async function GET(request: NextRequest) {
       return new NextResponse('API endpoint not found', { status: 404 })
     }
 
-    console.log('Requested file:', file)
+    console.log(`\n📖 ═══ ЗАГРУЗКА ФАЙЛА ═══`)
+    console.log(`📄  Запрошенный файл: ${decodeURIComponent(file)}`)
 
     // Получаем абсолютный путь к файлу с учетом структуры сабмодуля
     const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
     const filePath = path.join(projectRoot, file)
-    console.log('Full file path:', filePath, 'Project root:', projectRoot)
+    console.log(`🗂️   Полный путь: ${filePath}`)
 
     try {
       // Проверяем существование файла
       await fs.access(filePath)
     } catch (error) {
-      console.error('File not found:', filePath)
+      console.error(`❌  Файл не найден: ${decodeURIComponent(file)}`)
+      console.error('════════════════════════\n')
       return new NextResponse('File not found', { status: 404 })
     }
 
     // Читаем содержимое файла
     const content = await fs.readFile(filePath, 'utf-8')
-    console.log('File content length:', content.length)
 
     // Обрабатываем контент
     const processedContent = extractContent(content)
+    console.log(`✅  Файл успешно обработан`)
+    console.log('════════════════════════\n')
 
     // Устанавливаем заголовки для предотвращения кэширования
     const headers = {
@@ -348,7 +354,9 @@ export async function GET(request: NextRequest) {
 
     return new NextResponse(processedContent, { headers })
   } catch (error: any) {
-    console.error('Error processing request:', error)
+    console.error(`\n💥 ═══ ОШИБКА ═══`)
+    console.error(`❌  Ошибка обработки запроса: ${error?.message || 'Неизвестная ошибка'}`)
+    console.error('════════════════════════\n')
     return new NextResponse(`Error reading file: ${error?.message || 'Unknown error'}`, { status: 500 })
   }
 } 
