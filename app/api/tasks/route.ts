@@ -331,7 +331,7 @@ export async function GET(request: NextRequest) {
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       'Pragma': 'no-cache',
       'Expires': '-1',
-      'X-File-Path': filePath,
+      'X-File-Path': encodeURIComponent(filePath), // Кодируем путь для HTTP заголовка
       'X-Content-Length': processedContent.length.toString()
     }
 
