@@ -230,25 +230,14 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const file = searchParams.get('file')
     
-    // Красивый вывод информации о запросе
-    console.log('\n🚀 ═══ API REQUEST ═══')
-    console.log(`📄  Файл: ${file || 'список заданий'}`)
-    if (file) {
-      const decodedFile = decodeURIComponent(file)
-      console.log(`🎯  Decoded: ${decodedFile}`)
-    }
-    
     if (!file) {
       // Если файл не указан, возвращаем список заданий (как в старой версии)
       try {
         const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
         const srcPath = path.join(projectRoot, 'src')
         
-        console.log(`📁  Сканируем директорию: ${srcPath}`)
-        
         // Получаем все задания
         const allTasks = await scanDirectory(srcPath)
-        console.log(`✅  Найдено заданий: ${allTasks.length}`)
         
         // Группируем задания по темам
         const chapters: { [key: string]: any } = {}
@@ -257,12 +246,9 @@ export async function GET(request: NextRequest) {
         clearServerConfigCache()
         const config = await loadServerConfig()
         
-        console.log(`⚙️   Конфигурация загружена: ${config.title}`)
-        
         allTasks.forEach(task => {
           if (!chapters[task.chapter]) {
             const translatedChapter = config.chapterTranslations[task.chapter] || task.chapter
-            console.log(`🔄  Глава: ${translatedChapter}`)
             chapters[task.chapter] = {
               chapter: translatedChapter,
               originalChapter: task.chapter,
@@ -279,9 +265,6 @@ export async function GET(request: NextRequest) {
         // Преобразуем объект в массив и сортируем темы по оригинальным названиям
         const result = Object.values(chapters)
           .sort((a: any, b: any) => a.originalChapter.localeCompare(b.originalChapter))
-
-        console.log(`📚  Всего тем: ${result.length}`)
-        console.log('════════════════════════\n')
         return NextResponse.json(result)
       } catch (error) {
         console.error(`💥  Ошибка при сканировании заданий: ${error}`)
@@ -317,13 +300,9 @@ export async function GET(request: NextRequest) {
       return new NextResponse('API endpoint not found', { status: 404 })
     }
 
-    console.log(`\n📖 ═══ ЗАГРУЗКА ФАЙЛА ═══`)
-    console.log(`📄  Запрошенный файл: ${decodeURIComponent(file)}`)
-
     // Получаем абсолютный путь к файлу с учетом структуры сабмодуля
     const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
     const filePath = path.join(projectRoot, file)
-    console.log(`🗂️   Полный путь: ${filePath}`)
 
     try {
       // Проверяем существование файла
@@ -339,8 +318,6 @@ export async function GET(request: NextRequest) {
 
     // Обрабатываем контент
     const processedContent = extractContent(content)
-    console.log(`✅  Файл успешно обработан`)
-    console.log('════════════════════════\n')
 
     // Устанавливаем заголовки для предотвращения кэширования
     const headers = {
