@@ -13,6 +13,7 @@ interface TaskControlsProps {
   error: string | null
   isFullscreen: boolean
   onToggleFullscreen: () => void
+  onError: (error: string) => void
 }
 
 export default function TaskControls({
@@ -24,7 +25,8 @@ export default function TaskControls({
   isRefreshing,
   error,
   isFullscreen,
-  onToggleFullscreen
+  onToggleFullscreen,
+  onError
 }: TaskControlsProps) {
   return (
     <div className="task-controls">
@@ -160,7 +162,31 @@ export default function TaskControls({
             <>
               <motion.button
                 className="task-control-button"
-                onClick={() => onOpenInVSCode(taskFile)}
+                onClick={async () => {
+                  try {
+                    // Кодируем путь перед отправкой
+                    const encodedPath = encodeURIComponent(taskFile)
+                    const response = await fetch('/api/vscode', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ file: encodedPath }),
+                    })
+                    
+                    const data = await response.json()
+                    
+                    if (!response.ok) {
+                      throw new Error(data.error || 'Failed to open VS Code')
+                    }
+
+                    // Открываем URL в новой вкладке
+                    window.open(data.url, '_blank')
+                  } catch (error) {
+                    const message = error instanceof Error ? error.message : 'Не удалось открыть файл в VS Code'
+                    onError(message)
+                  }
+                }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >

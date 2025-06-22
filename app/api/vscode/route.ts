@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
-import { exec } from 'child_process'
-import { promisify } from 'util'
-import * as fs from 'fs'
-import * as path from 'path'
-
-const execAsync = promisify(exec)
+import { platform } from 'os'
+import path from 'path'
 
 export async function POST(request: Request) {
   try {
@@ -14,22 +10,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File path is required' }, { status: 400 })
     }
 
-    // Нормализуем путь и экранируем специальные символы
-    const normalizedPath = path.normalize(file).replace(/\\/g, '/')
-    const escapedPath = normalizedPath.replace(/(["\s'$`\\])/g, '\\$1')
+    // Декодируем URI-компоненты в пути, если они есть
+    const decodedFile = decodeURIComponent(file)
     
-    // Используем команду code для открытия файла в VS Code
-    await execAsync(`code "${escapedPath}"`)
+    // Нормализуем путь в соответствии с текущей ОС
+    const normalizedPath = path.normalize(decodedFile)
     
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error opening file in VS Code:', error)
+    // Создаем URL для протокола vscode://
+    // Используем file:// для абсолютного пути к файлу
+    const fileUrl = `file://${normalizedPath}`
+    const vsCodeUrl = `vscode://file${fileUrl}`
+
+    // Возвращаем URL для открытия в браузере
     return NextResponse.json({ 
-      error: 'Failed to open file',
-      details: error instanceof Error ? error.message : String(error)
+      success: true,
+      url: vsCodeUrl
+    })
+  } catch (error) {
+    console.error('Error generating VS Code URL:', error)
+    return NextResponse.json({ 
+      error: 'Failed to generate VS Code URL',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
-} 
+}
 
 // Функция для определения является ли файл заданием
 function isTaskFile(filename: string): boolean {
