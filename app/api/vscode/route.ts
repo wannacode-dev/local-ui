@@ -14,13 +14,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File path is required' }, { status: 400 })
     }
 
+    // Нормализуем путь и экранируем специальные символы
+    const normalizedPath = path.normalize(file).replace(/\\/g, '/')
+    const escapedPath = normalizedPath.replace(/(["\s'$`\\])/g, '\\$1')
+    
     // Используем команду code для открытия файла в VS Code
-    await execAsync(`code "${file}"`)
+    await execAsync(`code "${escapedPath}"`)
     
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error opening file in VS Code:', error)
-    return NextResponse.json({ error: 'Failed to open file' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to open file',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 })
   }
 } 
 
