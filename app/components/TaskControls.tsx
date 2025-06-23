@@ -13,7 +13,7 @@ interface TaskControlsProps {
   error: string | null
   isFullscreen: boolean
   onToggleFullscreen: () => void
-  onError: (error: string) => void
+  onError?: (error: string) => void
 }
 
 export default function TaskControls({
@@ -184,7 +184,7 @@ export default function TaskControls({
                     window.open(data.url, '_blank')
                   } catch (error) {
                     const message = error instanceof Error ? error.message : 'Не удалось открыть файл в VS Code'
-                    onError(message)
+                    onError?.(message)
                   }
                 }}
                 whileHover={{ scale: 1.02 }}
