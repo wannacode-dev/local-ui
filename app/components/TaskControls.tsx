@@ -14,6 +14,7 @@ interface TaskControlsProps {
   isFullscreen: boolean
   onToggleFullscreen: () => void
   onError?: (error: string) => void
+  hasSolution: boolean
 }
 
 export default function TaskControls({
@@ -26,7 +27,8 @@ export default function TaskControls({
   error,
   isFullscreen,
   onToggleFullscreen,
-  onError
+  onError,
+  hasSolution
 }: TaskControlsProps) {
   return (
     <div className="task-controls">
@@ -209,18 +211,20 @@ export default function TaskControls({
                 Обновить
               </motion.button>
 
-              <motion.button
-                className={`task-control-button ${viewMode === 'solution' ? '' : 'solution'}`}
-                onClick={() => {
-                  const newMode = viewMode === 'problem' ? 'solution' : 'problem'
-                  onViewModeChange(newMode)
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Lightbulb size={20} />
-                {viewMode === 'problem' ? 'Показать решение' : 'Вернуться к заданию'}
-              </motion.button>
+              {hasSolution && (
+                <motion.button
+                  className={`task-control-button ${viewMode === 'solution' ? '' : 'solution'}`}
+                  onClick={() => {
+                    const newMode = viewMode === 'problem' ? 'solution' : 'problem'
+                    onViewModeChange(newMode)
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Lightbulb size={20} />
+                  {viewMode === 'problem' ? 'Показать решение' : 'Вернуться к заданию'}
+                </motion.button>
+              )}
 
               <motion.button
                 className="task-control-button"

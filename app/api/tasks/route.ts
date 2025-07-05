@@ -35,32 +35,48 @@ async function scanDirectory(dir: string): Promise<any[]> {
     if (stat.isDirectory()) {
       // Рекурсивно проверяем все поддиректории
       tasks.push(...await scanDirectory(fullPath))
-    } else if (item.includes('.problem.') && 
-              (item.endsWith('.html') || item.endsWith('.js') || item.endsWith('.jsx'))) {
+    } else if ((item.includes('.problem.') || item.includes('.проблема.')) && 
+              (item.endsWith('.html') || item.endsWith('.js') || item.endsWith('.jsx') || 
+               item.endsWith('.ts') || item.endsWith('.tsx') || item.endsWith('.css'))) {
       // Нашли файл задания
       try {
         const content = await fs.readFile(fullPath, 'utf-8')
-        const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
+        const projectRoot = process.cwd() // Текущая директория проекта
         const srcPath = path.join(projectRoot, 'src')
         const relativePath = path.relative(srcPath, fullPath)
         
-        // Получаем имя темы (родительская директория)
+        // Получаем имя темы (первая директория в пути)
         const pathParts = relativePath.split(path.sep)
-        const chapter = pathParts[0]
+        let chapter = pathParts[0]
+        
+        // Если структура вложенная (тема/задание/файл), берем первую папку как тему
+        if (pathParts.length > 2) {
+          chapter = pathParts[0]
+        }
         
         // Извлекаем название задания (первая строка после "Задание:")
         const nameMatch = content.match(/Задание:\s*([^\n]*)/);
         let name = nameMatch ? nameMatch[1].trim() : item;
         
-        // Если название не найдено в комментарии, форматируем имя файла
+        // Если название не найдено в комментарии, форматируем имя файла или папки
         if (!nameMatch) {
-          // Убираем номер, расширение и .problem/.solution
-          name = item
-            .replace(/^\d+-/, '') // убираем номер в начале
-            .replace(/\.(problem|solution)\..*$/, '') // убираем .problem/.solution и расширение
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
+          // Если есть промежуточная папка с названием задания, используем её
+          if (pathParts.length > 2) {
+            const taskFolder = pathParts[1]
+            name = taskFolder
+              .replace(/^\d+-/, '') // убираем номер в начале
+              .split('-')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+          } else {
+            // Иначе используем имя файла
+            name = item
+              .replace(/^\d+-/, '') // убираем номер в начале
+              .replace(/\.(problem|проблема)\..*$/, '') // убираем .problem/.проблема и расширение
+              .split('-')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+          }
         }
         
         // Извлекаем полное описание задания
@@ -68,12 +84,20 @@ async function scanDirectory(dir: string): Promise<any[]> {
                         content.match(/<!--\s*Задание:[\s\S]*?-->/) ||
                         [null, ''];
 
-        tasks.push({
-          name: name,
-          description: descMatch[0] || '',
-          file: relativePath.replace(/\\/g, '/'),
-          chapter: chapter
-        });
+        // Проверяем, не добавляли ли мы уже это задание (для избежания дублирования problem/solution)
+        const existingTask = tasks.find(t => 
+          t.chapter === chapter && 
+          t.name === name
+        );
+
+        if (!existingTask) {
+          tasks.push({
+            name: name,
+            description: descMatch[0] || '',
+            file: relativePath.replace(/\\/g, '/'),
+            chapter: chapter
+          });
+        }
       } catch (error) {
         console.error(`⚠️   Ошибка чтения файла: ${path.basename(fullPath)}`);
       }
@@ -113,7 +137,37 @@ function extractContent(content: string): string {
     return content
   }
 
-  // Для JS/JSX файлов создаем HTML обертку
+  // Если это CSS файл
+  if (content.includes('@') || content.includes('{') || content.includes('color:') || content.includes('background:')) {
+    return `
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Preview</title>
+    <style>
+        ${content}
+    </style>
+</head>
+<body>
+    <div style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <h1>CSS Превью</h1>
+        <p>Ваши CSS стили применены к этой странице.</p>
+        <div class="example-content">
+            <h2>Пример контента</h2>
+            <p>Этот текст поможет увидеть примененные стили.</p>
+            <button>Пример кнопки</button>
+            <div class="box" style="width: 100px; height: 100px; background: #f0f0f0; margin: 10px 0; border: 1px solid #ccc;">
+                Блок для стилизации
+            </div>
+        </div>
+    </div>
+</body>
+</html>`
+  }
+
+  // Для JS/JSX/TS/TSX файлов создаем HTML обертку
   return `
 <!DOCTYPE html>
 <html lang="ru">
@@ -124,6 +178,7 @@ function extractContent(content: string): string {
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/preset-typescript@7/babel.min.js"></script>
     <style>
         body {
             padding: 20px;
@@ -217,8 +272,11 @@ function extractContent(content: string): string {
             const root = document.getElementById('root');
             root.innerHTML = '<div class="task-error"><strong>Ошибка:</strong><br/>' + event.error?.message + '</div>';
         });
+
+        // Настройка Babel для TypeScript
+        Babel.registerPreset('typescript', BabelPresetTypescript);
     </script>
-    <script type="text/babel">
+    <script type="text/babel" data-presets="react,typescript">
         ${content}
     </script>
 </body>
@@ -233,7 +291,7 @@ export async function GET(request: NextRequest) {
     if (!file) {
       // Если файл не указан, возвращаем список заданий (как в старой версии)
       try {
-        const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
+        const projectRoot = process.cwd() // Текущая директория проекта
         const srcPath = path.join(projectRoot, 'src')
         
         // Получаем все задания
@@ -300,15 +358,15 @@ export async function GET(request: NextRequest) {
       return new NextResponse('API endpoint not found', { status: 404 })
     }
 
-    // Получаем абсолютный путь к файлу с учетом структуры сабмодуля
-    const projectRoot = path.join(process.cwd(), '..') // Переходим в родительскую директорию
+    // Получаем абсолютный путь к файлу
+    const projectRoot = process.cwd() // Текущая директория проекта
     const filePath = path.join(projectRoot, file)
 
     try {
       // Проверяем существование файла
       await fs.access(filePath)
     } catch (error) {
-      console.error(`❌  Файл не найден: ${decodeURIComponent(file)}`)
+      console.error(`❌  Файл не найден: ${file}`)
       console.error('════════════════════════\n')
       return new NextResponse('File not found', { status: 404 })
     }
@@ -325,7 +383,7 @@ export async function GET(request: NextRequest) {
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       'Pragma': 'no-cache',
       'Expires': '-1',
-      'X-File-Path': encodeURIComponent(filePath), // Кодируем путь для HTTP заголовка
+      'X-File-Path': Buffer.from(filePath).toString('base64'), // Кодируем путь в base64 для безопасности
       'X-Content-Length': processedContent.length.toString()
     }
 

@@ -15,13 +15,37 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange }: Tas
   const [isRefreshing, setIsRefreshing] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [hasSolution, setHasSolution] = useState(false)
+
+  // Проверяем существование файла решения
+  const checkSolutionExists = async (problemFile: string) => {
+    let solutionFile = problemFile
+    if (problemFile.includes('.problem.')) {
+      solutionFile = problemFile.replace('.problem.', '.solution.')
+    } else if (problemFile.includes('.проблема.')) {
+      solutionFile = problemFile.replace('.проблема.', '.решение.')
+    }
+    
+    try {
+      const normalizedPath = `src/${solutionFile.replace(/^src\//, '')}`
+      const response = await fetch(`/api/tasks?file=${encodeURIComponent(normalizedPath)}`)
+      return response.ok
+    } catch {
+      return false
+    }
+  }
 
   const handleOpenInVSCode = async (file: string) => {
     try {
       // Подготавливаем путь к файлу
       let filePath = file
       if (viewMode === 'solution') {
-        filePath = filePath.replace('.problem.', '.solution.')
+        // Пробуем разные варианты решений
+        if (filePath.includes('.problem.')) {
+          filePath = filePath.replace('.problem.', '.solution.')
+        } else if (filePath.includes('.проблема.')) {
+          filePath = filePath.replace('.проблема.', '.решение.')
+        }
       }
       
       // Убираем лишний префикс src/, если он уже есть в пути
@@ -54,7 +78,12 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange }: Tas
     try {
       let filePath = taskFile
       if (viewMode === 'solution') {
-        filePath = filePath.replace('.problem.', '.solution.')
+        // Пробуем разные варианты решений
+        if (filePath.includes('.problem.')) {
+          filePath = filePath.replace('.problem.', '.solution.')
+        } else if (filePath.includes('.проблема.')) {
+          filePath = filePath.replace('.проблема.', '.решение.')
+        }
       }
       
       // Убираем лишний префикс src/, если он уже есть в пути
@@ -90,6 +119,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange }: Tas
     console.log('TaskViewer effect triggered:', { taskFile, viewMode })
     if (taskFile) {
       handleRefresh()
+      // Проверяем существование решения
+      checkSolutionExists(taskFile).then(setHasSolution)
     }
   }, [taskFile, viewMode])
 
@@ -113,6 +144,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange }: Tas
         error={error}
         isFullscreen={isFullscreen}
         onToggleFullscreen={() => setIsFullscreen(f => !f)}
+        hasSolution={hasSolution}
       />
       
       {content ? (

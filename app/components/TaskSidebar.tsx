@@ -73,9 +73,9 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
   const isTaskSelected = (taskFile: string) => {
     if (!selectedTask) return false
     
-    // Нормализуем пути для сравнения (убираем .problem/.solution)
+    // Нормализуем пути для сравнения (убираем .problem/.проблема)
     const normalizeTaskFile = (file: string) => {
-      return file.replace(/\.(problem|solution)\./, '.PLACEHOLDER.')
+      return file.replace(/\.(problem|проблема)\./, '.PLACEHOLDER.')
     }
     
     return normalizeTaskFile(selectedTask) === normalizeTaskFile(taskFile)
