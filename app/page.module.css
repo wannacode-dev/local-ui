@@ -2,28 +2,41 @@
   display: flex;
   min-height: 100vh;
   background: #f8fafc;
+  --sidebar-width: 280px;
+}
+
+.container[style*="--sidebar-hidden: 1"] {
+  --sidebar-width: 60px;
 }
 
 .mainContent {
   flex: 1;
-  margin-left: 10%;
-  min-width: 0; /* Предотвращает переполнение */
+  margin-left: var(--sidebar-width);
+  min-width: 0;
+  transition: margin-left 0.3s ease;
+  position: relative;
 }
 
 .sidebar {
   position: fixed;
   left: 0;
   top: 0;
-  width: 10%;
-  min-width: 250px;
+  width: var(--sidebar-width);
   height: 100vh;
   z-index: 1000;
+  transition: transform 0.3s ease;
 }
+
+
 
 /* Адаптивность */
 @media (max-width: 768px) {
   .container {
-    flex-direction: column;
+    --sidebar-width: 300px;
+  }
+  
+  .container[style*="--sidebar-hidden: 1"] {
+    --sidebar-width: 50px;
   }
   
   .mainContent {
@@ -31,9 +44,7 @@
   }
   
   .sidebar {
-    position: relative;
-    width: 100%;
-    height: auto;
-    min-height: auto;
+    width: var(--sidebar-width);
+    z-index: 1100;
   }
 } 

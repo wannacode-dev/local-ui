@@ -10,6 +10,7 @@ export default function Home() {
   const [selectedTask, setSelectedTask] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'problem' | 'solution'>('problem')
   const [tasks, setTasks] = useState<any[]>([])
+  const [sidebarHidden, setSidebarHidden] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -59,13 +60,15 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.sidebar}>
+    <div className={styles.container} style={{ '--sidebar-hidden': sidebarHidden ? '1' : '0' } as any}>
+      <div className={`${styles.sidebar} ${sidebarHidden ? styles.hidden : ''}`}>
         <TaskSidebar 
           tasks={tasks} 
           onTaskSelect={handleTaskSelect}
           selectedTask={selectedTask}
           viewMode={viewMode}
+          isHidden={sidebarHidden}
+          onToggleHidden={() => setSidebarHidden(!sidebarHidden)}
         />
       </div>
       <div className={styles.mainContent}>

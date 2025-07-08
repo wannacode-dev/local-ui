@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion, easeInOut } from 'framer-motion'
-import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
+import { ChevronRight, Folder, FolderOpen, X, PanelLeftClose, Menu, ChevronsRight, Code2, BookOpen } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import styles from './TaskSidebar.module.css'
 
@@ -21,9 +21,11 @@ interface TaskSidebarProps {
   onTaskSelect: (taskFile: string) => void
   selectedTask: string | null
   viewMode: 'problem' | 'solution'
+  isHidden: boolean
+  onToggleHidden: () => void
 }
 
-export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMode }: TaskSidebarProps) {
+export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMode, isHidden, onToggleHidden }: TaskSidebarProps) {
   const [openChapter, setOpenChapter] = useState<number | null>(0)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -85,47 +87,101 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
 
   return (
     <div className={styles.sidebar}>
-      <div className={styles.header}>
-        <p className={styles.headerText}>
-          Всего глав: {tasks.length}
-        </p>
+      <div className={`${styles.header} ${isHidden ? styles.headerCollapsed : ''}`}>
+        {!isHidden && (
+          <div className={styles.headerContent}>
+            <div className={styles.logo}>
+              <Code2 size={20} className={styles.logoIcon} />
+              <span className={styles.logoText}>
+                {(() => {
+                  // Находим название текущего задания
+                  if (!selectedTask) return 'Курс'
+                  
+                  for (const chapter of tasks) {
+                    const task = chapter.tasks.find(t => isTaskSelected(t.file))
+                    if (task) return task.name
+                  }
+                  return 'Курс'
+                })()}
+              </span>
+            </div>
+            <div className={styles.taskCount}>
+              {tasks.reduce((total, chapter) => total + chapter.tasks.length, 0)} заданий
+            </div>
+          </div>
+        )}
+        
+        <motion.button
+          className={`${styles.toggleButton} ${isHidden ? styles.toggleButtonCollapsed : ''}`}
+          onClick={onToggleHidden}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title={isHidden ? "Развернуть боковое меню" : "Свернуть боковое меню"}
+        >
+          {isHidden ? (
+            <ChevronsRight size={20} />
+          ) : (
+            <PanelLeftClose size={16} />
+          )}
+        </motion.button>
       </div>
       
-      <div className={styles.chaptersContainer}>
+      <div className={`${styles.chaptersContainer} ${isHidden ? styles.chaptersCollapsed : ''}`}>
         {tasks.map((chapter, chapterIndex) => (
           <div 
             key={chapterIndex} 
             className={styles.chapterItem}
           >
             <motion.button
-              className={styles.chapterButton}
-              onClick={() => toggleChapter(chapterIndex)}
+              className={`${styles.chapterButton} ${isHidden ? styles.chapterButtonCollapsed : ''}`}
+              onClick={() => {
+                if (!isHidden) {
+                  toggleChapter(chapterIndex)
+                }
+              }}
               whileTap={{ scale: 0.98 }}
+              title={isHidden ? formatChapterName(chapter.chapter) : undefined}
             >
-              <span className={styles.chapterContent}>
+              {isHidden ? (
+                // Свернутый вид - только иконка
                 <motion.span
-                  className={styles.chapterIcon}
-                  animate={{ rotate: openChapter === chapterIndex ? 90 : 0 }}
+                  className={styles.folderIconCollapsed}
+                  animate={{
+                    scale: openChapter === chapterIndex ? 1.1 : 1,
+                  }}
                   transition={{ duration: 0.2, ease: easeInOut }}
                 >
-                  <ChevronRight size={16} />
+                  {openChapter === chapterIndex ? <FolderOpen size={20} /> : <Folder size={20} />}
                 </motion.span>
-                <span className={styles.chapterTitle}>{formatChapterName(chapter.chapter)}</span>
-              </span>
-              <motion.span
-                className={styles.folderIcon}
-                animate={{
-                  rotate: openChapter === chapterIndex ? 5 : 0,
-                  scale: openChapter === chapterIndex ? 1.05 : 1,
-                }}
-                transition={{ duration: 0.2, ease: easeInOut }}
-              >
-                {openChapter === chapterIndex ? <FolderOpen size={16} /> : <Folder size={16} />}
-              </motion.span>
+              ) : (
+                // Развернутый вид - полный интерфейс
+                <>
+                  <span className={styles.chapterContent}>
+                    <motion.span
+                      className={styles.chapterIcon}
+                      animate={{ rotate: openChapter === chapterIndex ? 90 : 0 }}
+                      transition={{ duration: 0.2, ease: easeInOut }}
+                    >
+                      <ChevronRight size={16} />
+                    </motion.span>
+                    <span className={styles.chapterTitle}>{formatChapterName(chapter.chapter)}</span>
+                  </span>
+                  <motion.span
+                    className={styles.folderIcon}
+                    animate={{
+                      rotate: openChapter === chapterIndex ? 5 : 0,
+                      scale: openChapter === chapterIndex ? 1.05 : 1,
+                    }}
+                    transition={{ duration: 0.2, ease: easeInOut }}
+                  >
+                    {openChapter === chapterIndex ? <FolderOpen size={16} /> : <Folder size={16} />}
+                  </motion.span>
+                </>
+              )}
             </motion.button>
             
             <AnimatePresence initial={false}>
-              {openChapter === chapterIndex && (
+              {openChapter === chapterIndex && !isHidden && (
                 <motion.div
                   className={styles.tasksContainer}
                   initial={{ height: 0, opacity: 0 }}
