@@ -20,9 +20,10 @@ interface TaskSidebarProps {
   tasks: Chapter[]
   onTaskSelect: (taskFile: string) => void
   selectedTask: string | null
+  viewMode: 'problem' | 'solution'
 }
 
-export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskSidebarProps) {
+export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMode }: TaskSidebarProps) {
   const [openChapter, setOpenChapter] = useState<number | null>(0)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -74,9 +75,9 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
   const isTaskSelected = (taskFile: string) => {
     if (!selectedTask) return false
     
-    // Нормализуем пути для сравнения (убираем .problem/.проблема)
+    // Нормализуем пути для сравнения (убираем все суффиксы типов заданий)
     const normalizeTaskFile = (file: string) => {
-      return file.replace(/\.(problem|проблема)\./, '.PLACEHOLDER.')
+      return file.replace(/\.(problem|solution|проблема|решение)\./, '.PLACEHOLDER.')
     }
     
     return normalizeTaskFile(selectedTask) === normalizeTaskFile(taskFile)
@@ -148,7 +149,14 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask }: TaskS
                       whileTap={{ scale: 0.98 }}
                     >
                       <span className={styles.taskNumber}>{taskIndex + 1}</span>
-                      <span className={styles.taskName}>{task.name}</span>
+                      <div className={styles.taskContent}>
+                        <span className={styles.taskName}>{task.name}</span>
+                        {isTaskSelected(task.file) && (
+                          <span className={`${styles.viewModeIndicator} ${viewMode === 'solution' ? styles.solutionMode : styles.problemMode}`}>
+                            {viewMode === 'solution' ? 'Решение' : 'Задание'}
+                          </span>
+                        )}
+                      </div>
                     </motion.button>
                   ))}
                 </motion.div>

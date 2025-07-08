@@ -467,116 +467,123 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        {/* Хлебные крошки */}
-        <div className={styles.breadcrumbs}>
-          <span className={styles.breadcrumbTopic}>
-            {formatBreadcrumbName(topic)}
-          </span>
-          <span className={styles.breadcrumbSeparator}>/</span>
-          <span className={styles.breadcrumbTask}>
-            {formatBreadcrumbName(task)}
-          </span>
-        </div>
 
-        {/* Панель управления */}
-        <div className={styles.controls}>
-          <div className={styles.leftControls}>
-            {/* Автообновление */}
-            <motion.button
-              className={`${styles.actionButton} ${autoRefresh ? styles.solutionButton : styles.navButton}`}
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              title={autoRefresh ? 'Выключить автообновление' : 'Включить автообновление'}
-            >
-              <RotateCcw size={16} className={autoRefresh ? styles.spinning : ''} />
-              {autoRefresh ? 'Авто ВКЛ' : 'Авто ВЫКЛ'}
-            </motion.button>
-
-            {/* Сбросить */}
-            <motion.button
-              className={`${styles.actionButton} ${styles.resetButton}`}
-              onClick={handleReset}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              title="Сбросить файл к исходному состоянию"
-            >
-              <RefreshCw size={16} />
-              Сбросить
-            </motion.button>
-
-            {/* Обновить - скрываем с сохранением места */}
-            <motion.button
-              className={`${styles.actionButton} ${styles.refreshButton}`}
-              onClick={handleRefresh}
-              whileHover={{ scale: autoRefresh ? 1 : 1.02 }}
-              whileTap={{ scale: autoRefresh ? 1 : 0.98 }}
-              style={{ 
-                opacity: autoRefresh ? 0 : 1,
-                pointerEvents: autoRefresh ? 'none' : 'auto'
-              }}
-            >
-              <RefreshCw size={16} className={isRefreshing ? styles.spinning : ''} />
-              Обновить
-            </motion.button>
-          </div>
-
-          <div className={styles.rightControls}>
-            {/* Посмотреть решение */}
-            {hasSolution && (
-              <motion.button
-                className={`${styles.actionButton} ${styles.solutionButton}`}
-                onClick={() => onViewModeChange(viewMode === 'problem' ? 'solution' : 'problem')}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Lightbulb size={16} />
-                {viewMode === 'problem' ? 'Посмотреть решение' : 'Вернуться к заданию'}
-              </motion.button>
-            )}
-
-            {/* Открыть в новом окне */}
-            <motion.button
-              className={`${styles.actionButton} ${styles.newWindowButton}`}
-              onClick={handleOpenInNewWindow}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <ExternalLink size={16} />
-              Новое окно
-            </motion.button>
-          </div>
-        </div>
-      </div>
 
       {/* Область результата */}
       <div className={styles.content}>
-        <div className={styles.resultArea}>
-          <div className={styles.resultHeader}>
-            <h3 className={styles.resultTitle}>
-              Результат выполнения {viewMode === 'solution' ? '(Решение)' : '(Задание)'}
-            </h3>
+        <div className={styles.browserContainer}>
+          {/* Браузерная панель */}
+          <div className={styles.browserHeader}>
+            {/* Кнопки браузера */}
+            <div className={styles.browserButtons}>
+              <div className={styles.browserDot} style={{ background: '#ff5f57' }}></div>
+              <div className={styles.browserDot} style={{ background: '#ffbd2e' }}></div>
+              <div className={styles.browserDot} style={{ background: '#28ca42' }}></div>
+            </div>
+            
+            {/* Адресная строка с информацией */}
+            <div className={styles.addressBar}>
+              <div className={styles.addressContent}>
+                <span className={styles.addressTopic}>
+                  {formatBreadcrumbName(topic)}
+                </span>
+                <span className={styles.addressSeparator}>/</span>
+                <span className={styles.addressTask}>
+                  {formatBreadcrumbName(task)}
+                </span>
+                <span className={styles.addressMode}>
+                  {viewMode === 'solution' ? ' (Решение)' : ' (Задание)'}
+                </span>
+              </div>
+            </div>
+            
+            {/* Кнопки управления */}
+            <div className={styles.browserControls}>
+              {/* Обновить - скрываем при автообновлении */}
+              {!autoRefresh && (
+                <motion.button
+                  className={`${styles.browserAction} ${styles.refreshAction}`}
+                  onClick={handleRefresh}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <RefreshCw size={16} className={isRefreshing ? styles.spinning : ''} />
+                  <span>Обновить</span>
+                </motion.button>
+              )}
+
+              {/* Автообновление */}
+              <motion.button
+                className={`${styles.browserAction} ${autoRefresh ? styles.autoActiveAction : styles.autoAction}`}
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <RotateCcw size={16} className={autoRefresh ? styles.spinning : ''} />
+                <span>{autoRefresh ? 'Авто ВКЛ' : 'Авто ВЫКЛ'}</span>
+              </motion.button>
+
+              {/* Сбросить */}
+              <motion.button
+                className={`${styles.browserAction} ${styles.resetAction}`}
+                onClick={handleReset}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <RotateCcw size={16} />
+                <span>Сбросить</span>
+              </motion.button>
+
+              {/* Разделитель */}
+              <div className={styles.browserSeparator}></div>
+
+              {/* Посмотреть решение */}
+              {hasSolution && (
+                <motion.button
+                  className={`${styles.browserAction} ${styles.solutionAction}`}
+                  onClick={() => onViewModeChange(viewMode === 'problem' ? 'solution' : 'problem')}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Lightbulb size={16} />
+                  <span>{viewMode === 'problem' ? 'Решение' : 'Задание'}</span>
+                </motion.button>
+              )}
+
+              {/* Открыть в новом окне */}
+              <motion.button
+                className={`${styles.browserAction} ${styles.newWindowAction}`}
+                onClick={handleOpenInNewWindow}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ExternalLink size={16} />
+                <span>Новое окно</span>
+              </motion.button>
+            </div>
           </div>
           
-          {error && (
-            <div className={styles.error}>
-              {error}
-            </div>
-          )}
+          {/* Область контента браузера */}
+          <div className={styles.browserContent}>
+            {error && (
+              <div className={styles.error}>
+                {error}
+              </div>
+            )}
 
-          {content ? (
-            <iframe
-              ref={iframeRef}
-              srcDoc={content}
-              className={styles.iframe}
-              sandbox="allow-scripts allow-same-origin"
-            />
-          ) : (
-            <div className={styles.loading}>
-              {error ? 'Ошибка загрузки' : 'Загрузка задания...'}
-            </div>
-          )}
+            {content ? (
+              <iframe
+                ref={iframeRef}
+                srcDoc={content}
+                className={styles.iframe}
+                sandbox="allow-scripts allow-same-origin"
+              />
+            ) : (
+              <div className={styles.loading}>
+                {error ? 'Ошибка загрузки' : 'Загрузка задания...'}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

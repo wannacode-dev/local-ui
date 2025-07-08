@@ -65,6 +65,7 @@ export default function Home() {
           tasks={tasks} 
           onTaskSelect={handleTaskSelect}
           selectedTask={selectedTask}
+          viewMode={viewMode}
         />
       </div>
       <div className={styles.mainContent}>
