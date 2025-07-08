@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { loadServerConfig, clearServerConfigCache } from '@/app/lib/config-loader'
 
 export const dynamic = 'force-dynamic'
 
@@ -119,15 +118,25 @@ function extractContent(content: string): string {
     
     if (usesReact) {
       // Добавляем React библиотеки и Babel в head, если их нет
-      const scripts = `
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+      if (!content.includes('react@18') && !content.includes('@babel/standalone')) {
+        const scripts = `
+    <!-- React и Babel добавлены автоматически -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`
-      
-      // Вставляем скрипты перед закрывающим тегом </head>
-      if (!content.includes('react@18') || !content.includes('@babel/standalone')) {
-        content = content.replace('</head>', `${scripts}
+        
+        // Вставляем скрипты перед закрывающим тегом </head>
+        if (content.includes('</head>')) {
+          content = content.replace('</head>', `${scripts}
 </head>`)
+        } else {
+          // Если нет head тега, добавляем его после открывающего html
+          const headWithScripts = `<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">${scripts}
+</head>`
+          content = content.replace(/(<html[^>]*>)/i, `$1\n${headWithScripts}`)
+        }
       }
 
       // Если есть обычный script без type="text/babel", добавляем его
@@ -181,21 +190,31 @@ function extractContent(content: string): string {
     <script src="https://unpkg.com/@babel/preset-typescript@7/babel.min.js"></script>
     <style>
         body {
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
         }
         
-        button {
-            padding: 8px 16px;
-            font-size: 14px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-            cursor: pointer;
-            margin: 4px;
+        #root {
+            min-height: 100vh;
+            width: 100%;
         }
+        
+        /* Базовые стили для кнопок */
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: inherit;
+        }
+        
         button:hover {
-            background: #f1f5f9;
+            opacity: 0.9;
+        }
+        
+        * {
+            box-sizing: border-box;
         }
         
         ul {
@@ -208,7 +227,7 @@ function extractContent(content: string): string {
 
         .task-error {
             padding: 16px;
-            margin: 16px 0;
+            margin: 16px;
             border-radius: 8px;
             background: #fee2e2;
             color: #ef4444;
@@ -216,7 +235,7 @@ function extractContent(content: string): string {
         }
         .task-warning {
             padding: 16px;
-            margin: 16px 0;
+            margin: 16px;
             border-radius: 8px;
             background: #fef3c7;
             color: #d97706;
@@ -224,7 +243,7 @@ function extractContent(content: string): string {
         }
         .task-success {
             padding: 16px;
-            margin: 16px 0;
+            margin: 16px;
             border-radius: 8px;
             background: #dcfce7;
             color: #15803d;
@@ -300,15 +319,10 @@ export async function GET(request: NextRequest) {
         // Группируем задания по темам
         const chapters: { [key: string]: any } = {}
         
-        // Очищаем кэш для отладки
-        clearServerConfigCache()
-        const config = await loadServerConfig()
-        
         allTasks.forEach(task => {
           if (!chapters[task.chapter]) {
-            const translatedChapter = config.chapterTranslations[task.chapter] || task.chapter
             chapters[task.chapter] = {
-              chapter: translatedChapter,
+              chapter: task.chapter,
               originalChapter: task.chapter,
               tasks: []
             }

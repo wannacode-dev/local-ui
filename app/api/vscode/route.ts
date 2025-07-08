@@ -13,18 +13,23 @@ export async function POST(request: Request) {
     // Декодируем URI-компоненты в пути, если они есть
     const decodedFile = decodeURIComponent(file)
     
-    // Нормализуем путь в соответствии с текущей ОС
-    const normalizedPath = path.normalize(decodedFile)
+    // Получаем абсолютный путь к файлу
+    const projectRoot = process.cwd()
+    const absolutePath = path.resolve(projectRoot, decodedFile)
     
-    // Создаем URL для протокола vscode://
-    // Используем file:// для абсолютного пути к файлу
-    const fileUrl = `file://${normalizedPath}`
-    const vsCodeUrl = `vscode://file${fileUrl}`
+    console.log('Opening file:', absolutePath)
+    
+    // Создаем правильный URL для VS Code
+    // VS Code понимает vscode://file/АБСОЛЮТНЫЙ_ПУТЬ
+    const vsCodeUrl = `vscode://file/${absolutePath.replace(/\\/g, '/')}`
+
+    console.log('VS Code URL:', vsCodeUrl)
 
     // Возвращаем URL для открытия в браузере
     return NextResponse.json({ 
       success: true,
-      url: vsCodeUrl
+      url: vsCodeUrl,
+      filePath: absolutePath
     })
   } catch (error) {
     console.error('Error generating VS Code URL:', error)

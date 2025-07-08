@@ -4,24 +4,17 @@ import { useState, useEffect } from 'react'
 import TaskSidebar from './components/TaskSidebar'
 import TaskViewer from './components/TaskViewer'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { loadCourseConfig } from './config/course'
-import { CourseConfig } from './types/course'
+import styles from './page.module.css'
 
 export default function Home() {
   const [selectedTask, setSelectedTask] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'problem' | 'solution'>('problem')
   const [tasks, setTasks] = useState<any[]>([])
-  const [courseConfig, setCourseConfig] = useState<CourseConfig>({
-    title: 'Загрузка...',
-    description: 'Загрузка курса...',
-    chapterTranslations: {}
-  })
   const router = useRouter()
   const searchParams = useSearchParams()
 
   useEffect(() => {
     loadTasks()
-    loadConfig()
   }, [])
 
   useEffect(() => {
@@ -41,15 +34,6 @@ export default function Home() {
       setTasks(data)
     } catch (error) {
       console.error('Ошибка загрузки заданий:', error)
-    }
-  }
-
-  const loadConfig = async () => {
-    try {
-      const config = await loadCourseConfig()
-      setCourseConfig(config)
-    } catch (error) {
-      console.error('Ошибка загрузки конфигурации:', error)
     }
   }
 
@@ -75,30 +59,28 @@ export default function Home() {
   }
 
   return (
-    <div className="container">
-      <TaskSidebar 
-        tasks={tasks} 
-        onTaskSelect={handleTaskSelect}
-        selectedTask={selectedTask}
-      />
-      <div className="main-content">
-        <div className="header">
-          <h1>{courseConfig.title}</h1>
-          <p>{courseConfig.description}</p>
-        </div>
-        <div className="content">
-          {selectedTask ? (
-            <TaskViewer 
-              taskFile={selectedTask} 
-              viewMode={viewMode}
-              onViewModeChange={handleViewModeChange}
-            />
-          ) : (
-            <div className="loading">
-              Выберите задание из бокового меню
-            </div>
-          )}
-        </div>
+    <div className={styles.container}>
+      <div className={styles.sidebar}>
+        <TaskSidebar 
+          tasks={tasks} 
+          onTaskSelect={handleTaskSelect}
+          selectedTask={selectedTask}
+        />
+      </div>
+      <div className={styles.mainContent}>
+        {selectedTask ? (
+          <TaskViewer 
+            taskFile={selectedTask} 
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            allTasks={tasks}
+            onTaskSelect={handleTaskSelect}
+          />
+        ) : (
+          <div className="emptyState">
+            Выберите задание из бокового меню
+          </div>
+        )}
       </div>
     </div>
   )
