@@ -1,3 +1,7 @@
+:root {
+  --sidebar-width: 280px;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -41,7 +45,6 @@ button {
 
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

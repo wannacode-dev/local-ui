@@ -482,41 +482,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         {/* Панель управления */}
         <div className={styles.controls}>
           <div className={styles.leftControls}>
-            {/* Навигация */}
-            <div className={styles.navigationControls}>
-              <motion.button 
-                className={styles.navButton}
-                onClick={handlePreviousTask}
-                disabled={!hasPreviousTask}
-                whileHover={{ scale: hasPreviousTask ? 1.02 : 1 }}
-                whileTap={{ scale: hasPreviousTask ? 0.98 : 1 }}
-              >
-                <ChevronLeft size={16} />
-                Предыдущее
-              </motion.button>
-              <motion.button 
-                className={styles.navButton}
-                onClick={handleNextTask}
-                disabled={!hasNextTask}
-                whileHover={{ scale: hasNextTask ? 1.02 : 1 }}
-                whileTap={{ scale: hasNextTask ? 0.98 : 1 }}
-              >
-                Следующее
-                <ChevronRight size={16} />
-              </motion.button>
-            </div>
-
-            {/* Обновить */}
-            <motion.button
-              className={`${styles.actionButton} ${styles.refreshButton}`}
-              onClick={handleRefresh}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <RefreshCw size={16} className={isRefreshing ? styles.spinning : ''} />
-              Обновить
-            </motion.button>
-
             {/* Автообновление */}
             <motion.button
               className={`${styles.actionButton} ${autoRefresh ? styles.solutionButton : styles.navButton}`}
@@ -540,49 +505,24 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               <RefreshCw size={16} />
               Сбросить
             </motion.button>
+
+            {/* Обновить - скрываем с сохранением места */}
+            <motion.button
+              className={`${styles.actionButton} ${styles.refreshButton}`}
+              onClick={handleRefresh}
+              whileHover={{ scale: autoRefresh ? 1 : 1.02 }}
+              whileTap={{ scale: autoRefresh ? 1 : 0.98 }}
+              style={{ 
+                opacity: autoRefresh ? 0 : 1,
+                pointerEvents: autoRefresh ? 'none' : 'auto'
+              }}
+            >
+              <RefreshCw size={16} className={isRefreshing ? styles.spinning : ''} />
+              Обновить
+            </motion.button>
           </div>
 
           <div className={styles.rightControls}>
-            {/* Файлы */}
-            <div style={{ position: 'relative' }}>
-              <motion.button
-                className={`${styles.actionButton} ${styles.filesButton}`}
-                onClick={() => setShowFilesDropdown(!showFilesDropdown)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Files size={16} />
-                Файлы
-              </motion.button>
-
-              <AnimatePresence>
-                {showFilesDropdown && (
-                  <motion.div
-                    className={styles.dropdown}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    {taskFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className={styles.dropdownItem}
-                                                 onClick={() => {
-                           if (file.canOpenInVSCode) {
-                             handleOpenInVSCode(`playground/${file.path}`)
-                           }
-                           setShowFilesDropdown(false)
-                         }}
-                      >
-                        <Code size={14} />
-                        {file.name}
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             {/* Посмотреть решение */}
             {hasSolution && (
               <motion.button
@@ -637,6 +577,76 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               {error ? 'Ошибка загрузки' : 'Загрузка задания...'}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Footer с навигацией и файлами */}
+      <div className={styles.footer}>
+        <div className={styles.footerControls}>
+          {/* Навигация */}
+          <div className={styles.navigationControls}>
+            <motion.button 
+              className={styles.footerNavButton}
+              onClick={handlePreviousTask}
+              disabled={!hasPreviousTask}
+              whileHover={{ scale: hasPreviousTask ? 1.02 : 1 }}
+              whileTap={{ scale: hasPreviousTask ? 0.98 : 1 }}
+            >
+              <ChevronLeft size={16} />
+              Предыдущее
+            </motion.button>
+            <motion.button 
+              className={styles.footerNavButton}
+              onClick={handleNextTask}
+              disabled={!hasNextTask}
+              whileHover={{ scale: hasNextTask ? 1.02 : 1 }}
+              whileTap={{ scale: hasNextTask ? 0.98 : 1 }}
+            >
+              Следующее
+              <ChevronRight size={16} />
+            </motion.button>
+          </div>
+
+          {/* Файлы */}
+          <div style={{ position: 'relative' }}>
+            <motion.button
+              className={styles.footerActionButton}
+              onClick={() => setShowFilesDropdown(!showFilesDropdown)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Files size={16} />
+              Файлы
+            </motion.button>
+
+            <AnimatePresence>
+              {showFilesDropdown && (
+                <motion.div
+                  className={styles.dropdown}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  style={{ bottom: '100%', top: 'auto' }}
+                >
+                  {taskFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        if (file.canOpenInVSCode) {
+                          handleOpenInVSCode(`playground/${file.path}`)
+                        }
+                        setShowFilesDropdown(false)
+                      }}
+                    >
+                      <Code size={14} />
+                      {file.name}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
