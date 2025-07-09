@@ -38,7 +38,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const [hasSolution, setHasSolution] = useState(false)
   const [taskFiles, setTaskFiles] = useState<TaskFile[]>([])
   const [showFilesDropdown, setShowFilesDropdown] = useState(false)
-  const [autoRefresh, setAutoRefresh] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(true)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 

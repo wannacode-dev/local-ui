@@ -3,11 +3,9 @@
   "version": "1.0.0",
   "description": "Интерактивные задания по React на Next.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "start": "next dev",
     "lint": "next lint",
-    "setup": "node scripts/update-course.js",
+    "setup": "npm install && node scripts/update-course.js",
     "update-course": "node scripts/update-course.js"
   },
   "dependencies": {
