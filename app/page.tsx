@@ -82,7 +82,7 @@ export default function Home() {
           />
         ) : (
           <div className="emptyState">
-            Выберите задание из бокового меню
+            Выберите задание из бокового меню!
           </div>
         )}
       </div>
