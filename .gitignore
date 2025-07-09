@@ -6,3 +6,6 @@ BUSINESS_MODEL.md
 .temp-update
 .backup-*
 UPDATE_GUIDE.md
+PLATFORM_COMPATIBILITY.md
+test-platform.js
+.test-permissions

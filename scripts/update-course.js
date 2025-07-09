@@ -3,6 +3,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { execSync } = require('child_process');
+const os = require('os');
 
 // Цвета для консоли
 const colors = {
@@ -16,6 +17,44 @@ const colors = {
 
 function log(message, color = 'reset') {
   console.log(`${colors[color]}${message}${colors.reset}`);
+}
+
+// Определяем платформу
+const isWindows = os.platform() === 'win32';
+const isLinux = os.platform() === 'linux';
+const isMac = os.platform() === 'darwin';
+
+// Кроссплатформенное выполнение команд
+function execCommand(command, options = {}) {
+  const defaultOptions = {
+    encoding: 'utf8',
+    maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+    ...options
+  };
+  
+  // На Windows может потребоваться shell: true для некоторых команд
+  if (isWindows && !options.shell) {
+    defaultOptions.shell = true;
+  }
+  
+  try {
+    return execSync(command, defaultOptions);
+  } catch (error) {
+    // Улучшаем сообщения об ошибках для разных платформ
+    if (error.code === 'ENOENT') {
+      throw new Error(`Команда не найдена: ${command.split(' ')[0]}. Убедитесь что она установлена и добавлена в PATH.`);
+    }
+    throw error;
+  }
+}
+
+// Экранирование путей для команд shell (особенно важно для Windows)
+function escapePath(filePath) {
+  // Если путь содержит пробелы, оборачиваем в кавычки
+  if (filePath.includes(' ')) {
+    return isWindows ? `"${filePath}"` : `'${filePath}'`;
+  }
+  return filePath;
 }
 
 // Функция для сравнения версий
@@ -42,10 +81,10 @@ function checkVersions() {
       log(`❌ Требуется Node.js ${REQUIREMENTS.node}+, установлена ${nodeVersion}`, 'red');
       return false;
     }
-    log(`✅ Node.js ${nodeVersion} - OK`, 'green');
+    log(`✅ Node.js ${nodeVersion} - OK (${os.platform()})`, 'green');
 
     // Проверяем npm
-    const npmVersion = execSync('npm --version', { encoding: 'utf8' }).trim();
+    const npmVersion = execCommand('npm --version', { stdio: 'pipe' }).trim();
     if (compareVersions(npmVersion, REQUIREMENTS.npm) < 0) {
       log(`❌ Требуется npm ${REQUIREMENTS.npm}+, установлена ${npmVersion}`, 'red');
       return false;
@@ -75,16 +114,49 @@ async function createFullBackup() {
     
     fs.ensureDirSync(backupDir);
     
+    // На Unix системах устанавливаем права доступа
+    if (!isWindows) {
+      try {
+        fs.chmodSync(backupDir, 0o755);
+      } catch (error) {
+        log('⚠️  Не удалось установить права доступа для бэкапа (не критично)', 'yellow');
+      }
+    }
+    
     for (const item of itemsToBackup) {
       const srcPath = path.join(process.cwd(), item);
       const destPath = path.join(backupDir, item);
-      fs.copySync(srcPath, destPath);
+      
+      try {
+        fs.copySync(srcPath, destPath, {
+          preserveTimestamps: true,
+          errorOnExist: false,
+          overwrite: true
+        });
+      } catch (error) {
+        // На некоторых системах могут быть проблемы с правами доступа
+        if (error.code === 'EPERM' || error.code === 'EACCES') {
+          log(`⚠️  Проблемы с правами доступа при копировании ${item} (пропускаем)`, 'yellow');
+          continue;
+        }
+        throw error;
+      }
     }
     
     log(`💾 Бэкап создан: ${path.basename(backupDir)}`, 'green');
     return backupDir;
   } catch (error) {
     log(`❌ Ошибка создания бэкапа: ${error.message}`, 'red');
+    
+    // Даем дополнительные советы в зависимости от платформы
+    if (error.code === 'EPERM' || error.code === 'EACCES') {
+      if (isWindows) {
+        log('💡 Windows: Попробуйте запустить командную строку от имени администратора', 'yellow');
+      } else {
+        log('💡 Unix: Проверьте права доступа к папке проекта', 'yellow');
+      }
+    }
+    
     throw error;
   }
 }
@@ -169,7 +241,9 @@ async function updateCourse() {
   // Создаем полный бэкап перед началом
   let backupDir;
   try {
+    log('💾 Создаем полный бэкап проекта...', 'blue');
     backupDir = await createFullBackup();
+    log(`✅ Бэкап создан: ${path.basename(backupDir)}`, 'green');
   } catch (error) {
     log('❌ Не удалось создать бэкап. Обновление прервано.', 'red');
     process.exit(1);
@@ -199,20 +273,21 @@ async function updateCourse() {
     }
     
     // Клонируем template
-    execSync(`git clone --depth 1 "${TEMPLATE_REPO}" "${tempDir}"`, { 
+    const escapedTempDir = escapePath(tempDir);
+    execCommand(`git clone --depth 1 "${TEMPLATE_REPO}" ${escapedTempDir}`, { 
       stdio: 'pipe' 
     });
     
     log('💾 Сохраняем файлы курса...', 'blue');
     
     // Создаем backup папку
-    const backupDir = path.join(tempDir, 'backup');
-    fs.ensureDirSync(backupDir);
+    const tempBackupDir = path.join(tempDir, 'backup');
+    fs.ensureDirSync(tempBackupDir);
     
     // Сохраняем файлы которые не должны перезаписываться
     for (const preserveFile of PRESERVE_FILES) {
       const srcPath = path.join(process.cwd(), preserveFile);
-      const backupPath = path.join(backupDir, preserveFile);
+      const backupPath = path.join(tempBackupDir, preserveFile);
       
       if (fs.existsSync(srcPath)) {
         log(`  💾 Сохраняем ${preserveFile}`, 'yellow');
@@ -245,7 +320,7 @@ async function updateCourse() {
     
     // Восстанавливаем сохраненные файлы
     for (const preserveFile of PRESERVE_FILES) {
-      const backupPath = path.join(backupDir, preserveFile);
+      const backupPath = path.join(tempBackupDir, preserveFile);
       const destPath = path.join(process.cwd(), preserveFile);
       
       if (fs.existsSync(backupPath)) {
@@ -258,7 +333,7 @@ async function updateCourse() {
     
     // Устанавливаем зависимости
     try {
-      execSync('npm install', { stdio: 'inherit' });
+      execCommand('npm install', { stdio: 'inherit' });
       log('✅ Зависимости установлены', 'green');
     } catch (error) {
       throw new Error(`Ошибка установки зависимостей: ${error.message}`);
@@ -267,7 +342,7 @@ async function updateCourse() {
     // Проверяем что проект запускается
     log('🧪 Проверяем работоспособность...', 'blue');
     try {
-      execSync('npm run lint --silent', { stdio: 'pipe' });
+      execCommand('npm run lint --silent', { stdio: 'pipe' });
       log('✅ Линтер прошел успешно', 'green');
     } catch (error) {
       log('⚠️  Предупреждения линтера (не критично)', 'yellow');
@@ -285,9 +360,10 @@ async function updateCourse() {
     if (backupDir && fs.existsSync(backupDir)) {
       try {
         fs.removeSync(backupDir);
-        log('🧹 Бэкап очищен (обновление прошло успешно)', 'blue');
+        log(`🧹 Полный бэкап очищен: ${path.basename(backupDir)}`, 'blue');
       } catch (error) {
         log(`⚠️  Не удалось удалить бэкап: ${path.basename(backupDir)}`, 'yellow');
+        log('   Можете удалить вручную если больше не нужен', 'yellow');
       }
     }
     
@@ -326,9 +402,17 @@ async function updateCourse() {
 
 // Проверяем доступность git
 try {
-  execSync('git --version', { stdio: 'pipe' });
+  execCommand('git --version', { stdio: 'pipe' });
+  log('🔧 Проверка инструментов...', 'blue');
 } catch (error) {
   log('❌ Git не найден. Установите Git для работы скрипта.', 'red');
+  if (isWindows) {
+    log('💡 Windows: Скачайте Git с https://git-scm.com/download/win', 'yellow');
+  } else if (isMac) {
+    log('💡 macOS: Установите через "brew install git" или Xcode Command Line Tools', 'yellow');
+  } else if (isLinux) {
+    log('💡 Linux: Установите через пакетный менеджер, например "sudo apt install git"', 'yellow');
+  }
   process.exit(1);
 }
 
