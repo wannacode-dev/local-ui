@@ -18,6 +18,110 @@ function log(message, color = 'reset') {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
+// Функция для сравнения версий
+function compareVersions(current, required) {
+  const currentParts = current.split('.').map(Number);
+  const requiredParts = required.split('.').map(Number);
+  
+  for (let i = 0; i < Math.max(currentParts.length, requiredParts.length); i++) {
+    const currentPart = currentParts[i] || 0;
+    const requiredPart = requiredParts[i] || 0;
+    
+    if (currentPart > requiredPart) return 1;
+    if (currentPart < requiredPart) return -1;
+  }
+  return 0;
+}
+
+// Проверка версий Node.js и npm
+function checkVersions() {
+  try {
+    // Проверяем Node.js
+    const nodeVersion = process.version.replace('v', '');
+    if (compareVersions(nodeVersion, REQUIREMENTS.node) < 0) {
+      log(`❌ Требуется Node.js ${REQUIREMENTS.node}+, установлена ${nodeVersion}`, 'red');
+      return false;
+    }
+    log(`✅ Node.js ${nodeVersion} - OK`, 'green');
+
+    // Проверяем npm
+    const npmVersion = execSync('npm --version', { encoding: 'utf8' }).trim();
+    if (compareVersions(npmVersion, REQUIREMENTS.npm) < 0) {
+      log(`❌ Требуется npm ${REQUIREMENTS.npm}+, установлена ${npmVersion}`, 'red');
+      return false;
+    }
+    log(`✅ npm ${npmVersion} - OK`, 'green');
+
+    return true;
+  } catch (error) {
+    log(`❌ Ошибка проверки версий: ${error.message}`, 'red');
+    return false;
+  }
+}
+
+// Создание полного бэкапа проекта
+async function createFullBackup() {
+  const backupDir = path.join(process.cwd(), '.backup-' + Date.now());
+  
+  try {
+    log('💾 Создаем полный бэкап проекта...', 'blue');
+    
+    // Копируем все кроме node_modules и .git
+    const itemsToBackup = fs.readdirSync(process.cwd()).filter(item => 
+      !['node_modules', '.git', '.next', '.backup-*'].some(exclude => 
+        item.startsWith(exclude.replace('*', ''))
+      )
+    );
+    
+    fs.ensureDirSync(backupDir);
+    
+    for (const item of itemsToBackup) {
+      const srcPath = path.join(process.cwd(), item);
+      const destPath = path.join(backupDir, item);
+      fs.copySync(srcPath, destPath);
+    }
+    
+    log(`💾 Бэкап создан: ${path.basename(backupDir)}`, 'green');
+    return backupDir;
+  } catch (error) {
+    log(`❌ Ошибка создания бэкапа: ${error.message}`, 'red');
+    throw error;
+  }
+}
+
+// Откат изменений из бэкапа
+async function rollbackFromBackup(backupDir) {
+  try {
+    log('🔄 Откатываем изменения из бэкапа...', 'yellow');
+    
+    if (!fs.existsSync(backupDir)) {
+      throw new Error('Папка бэкапа не найдена');
+    }
+    
+    // Восстанавливаем файлы из бэкапа
+    const itemsToRestore = fs.readdirSync(backupDir);
+    
+    for (const item of itemsToRestore) {
+      const srcPath = path.join(backupDir, item);
+      const destPath = path.join(process.cwd(), item);
+      
+      // Удаляем текущую версию
+      if (fs.existsSync(destPath)) {
+        fs.removeSync(destPath);
+      }
+      
+      // Восстанавливаем из бэкапа
+      fs.copySync(srcPath, destPath);
+    }
+    
+    log('✅ Откат выполнен успешно', 'green');
+    return true;
+  } catch (error) {
+    log(`❌ Ошибка отката: ${error.message}`, 'red');
+    return false;
+  }
+}
+
 // URL template репозитория
 const TEMPLATE_REPO = 'https://github.com/wannacode-dev/local-ui.git';
 
@@ -39,6 +143,12 @@ const PRESERVE_FILES = [
   'node_modules/'
 ];
 
+// Минимальные требования к версиям
+const REQUIREMENTS = {
+  node: '16.0.0',
+  npm: '8.0.0'
+};
+
 async function updateCourse() {
   log('🚀 Обновляем курс из template репозитория...', 'blue');
   
@@ -47,6 +157,34 @@ async function updateCourse() {
   if (!fs.existsSync(packageJsonPath)) {
     log('❌ Файл package.json не найден. Убедитесь что вы в корневой папке проекта.', 'red');
     process.exit(1);
+  }
+
+  // Проверяем версии Node.js и npm
+  log('🔍 Проверяем версии...', 'blue');
+  if (!checkVersions()) {
+    log('❌ Обновите Node.js и npm до требуемых версий', 'red');
+    process.exit(1);
+  }
+
+  // Создаем полный бэкап перед началом
+  let backupDir;
+  try {
+    backupDir = await createFullBackup();
+  } catch (error) {
+    log('❌ Не удалось создать бэкап. Обновление прервано.', 'red');
+    process.exit(1);
+  }
+
+  // Удаляем кэш Next.js если он есть
+  const nextCacheDir = path.join(process.cwd(), '.next');
+  if (fs.existsSync(nextCacheDir)) {
+    log('🧹 Очищаем кэш Next.js...', 'blue');
+    try {
+      fs.removeSync(nextCacheDir);
+      log('✅ Кэш Next.js очищен', 'green');
+    } catch (error) {
+      log('⚠️  Не удалось очистить кэш Next.js (не критично)', 'yellow');
+    }
   }
 
   // Создаем временную папку
@@ -119,7 +257,21 @@ async function updateCourse() {
     log('📦 Устанавливаем зависимости...', 'blue');
     
     // Устанавливаем зависимости
-    execSync('npm install', { stdio: 'inherit' });
+    try {
+      execSync('npm install', { stdio: 'inherit' });
+      log('✅ Зависимости установлены', 'green');
+    } catch (error) {
+      throw new Error(`Ошибка установки зависимостей: ${error.message}`);
+    }
+
+    // Проверяем что проект запускается
+    log('🧪 Проверяем работоспособность...', 'blue');
+    try {
+      execSync('npm run lint --silent', { stdio: 'pipe' });
+      log('✅ Линтер прошел успешно', 'green');
+    } catch (error) {
+      log('⚠️  Предупреждения линтера (не критично)', 'yellow');
+    }
     
     log('🎉 Курс успешно обновлен!', 'bold');
     log('\nРекомендуется:', 'blue');
@@ -129,8 +281,35 @@ async function updateCourse() {
     log('     git add .', 'yellow');
     log('     git commit -m "Update platform from template"', 'yellow');
     
+    // Очищаем бэкап если все прошло успешно
+    if (backupDir && fs.existsSync(backupDir)) {
+      try {
+        fs.removeSync(backupDir);
+        log('🧹 Бэкап очищен (обновление прошло успешно)', 'blue');
+      } catch (error) {
+        log(`⚠️  Не удалось удалить бэкап: ${path.basename(backupDir)}`, 'yellow');
+      }
+    }
+    
   } catch (error) {
-    log(`❌ Ошибка обновления: ${error.message}`, 'red');
+    log(`❌ Критическая ошибка обновления: ${error.message}`, 'red');
+    
+    // Пытаемся откатить изменения
+    if (backupDir) {
+      log('🔄 Пытаемся откатить изменения...', 'yellow');
+      const rollbackSuccess = await rollbackFromBackup(backupDir);
+      
+      if (rollbackSuccess) {
+        log('✅ Изменения откачены, проект в исходном состоянии', 'green');
+        log(`💾 Бэкап сохранен: ${path.basename(backupDir)}`, 'blue');
+      } else {
+        log('❌ Откат не удался! Восстановите проект вручную из бэкапа:', 'red');
+        log(`📁 Бэкап: ${backupDir}`, 'yellow');
+      }
+    } else {
+      log('❌ Бэкап не создан! Проверьте состояние проекта.', 'red');
+    }
+    
     process.exit(1);
   } finally {
     // Очищаем временную папку
