@@ -360,6 +360,20 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
             // Продолжаем поиск
           }
         }
+        
+        // Для файлов решений проверяем, существует ли файл в playground
+        // Если существует, значит пользователь его изменил, и мы не должны его обновлять
+        const cleanPath = filePath.replace(/^src\//, '')
+        
+        try {
+          const playgroundResponse = await fetch(`/api/playground?file=${encodeURIComponent(`src/${cleanPath}`)}&check=playground`, { method: 'HEAD' })
+          if (playgroundResponse.ok) {
+            // Файл существует в playground, не обновляем его
+            return
+          }
+        } catch {
+          // Файл не существует в playground, можем обновить
+        }
       }
       
       filePath = filePath.replace(/^src\//, '')
@@ -518,9 +532,12 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 onClick={() => setAutoRefresh(!autoRefresh)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                title={viewMode === 'solution' ? 'Автообновление отключено для решений' : 'Переключить автообновление'}
               >
                 <RotateCcw size={16} className={autoRefresh ? styles.spinning : ''} />
-                <span>{autoRefresh ? 'Авто ВКЛ' : 'Авто ВЫКЛ'}</span>
+                <span>
+                  {autoRefresh ? (viewMode === 'solution' ? 'Авто (решение)' : 'Авто ВКЛ') : 'Авто ВЫКЛ'}
+                </span>
               </motion.button>
 
               {/* Сбросить */}
