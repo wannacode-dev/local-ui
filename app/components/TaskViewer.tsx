@@ -39,6 +39,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const [taskFiles, setTaskFiles] = useState<TaskFile[]>([])
   const [showFilesDropdown, setShowFilesDropdown] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
+  const [solutionStatus, setSolutionStatus] = useState<'original' | 'modified' | 'notfound'>('original')
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -236,6 +237,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
   const handleOpenInNewWindow = async () => {
     let filePath = taskFile
+    
     if (viewMode === 'solution') {
       // Попробуем разные варианты решений
       const solutionVariants = []
@@ -248,19 +250,19 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         solutionVariants.push(filePath.replace('.проблема.', '.solution.'))
       }
       
-              // Найдем первый существующий файл решения
-        for (const variant of solutionVariants) {
-          try {
-            const testPath = `src/${variant.replace(/^src\//, '')}`
-            const testResponse = await fetch(`/api/playground?file=${encodeURIComponent(testPath)}`, { method: 'HEAD' })
-            if (testResponse.ok) {
-              filePath = variant
-              break
-            }
-          } catch {
-            // Продолжаем поиск
+      // Найдем первый существующий файл решения
+      for (const variant of solutionVariants) {
+        try {
+          const testPath = `src/${variant.replace(/^src\//, '')}`
+          const testResponse = await fetch(`/api/playground?file=${encodeURIComponent(testPath)}`, { method: 'HEAD' })
+          if (testResponse.ok) {
+            filePath = variant
+            break
           }
+        } catch {
+          // Продолжаем поиск
         }
+      }
     }
     
     const url = `/api/preview?file=${encodeURIComponent(filePath)}&live=true`
@@ -276,6 +278,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     setIsRefreshing(true)
     try {
       let filePath = taskFile
+      
       if (viewMode === 'solution') {
         // Попробуем разные варианты решений
         const solutionVariants = []
@@ -289,17 +292,24 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         }
         
         // Найдем первый существующий файл решения
+        let foundSolution = false
         for (const variant of solutionVariants) {
           try {
             const testPath = `src/${variant.replace(/^src\//, '')}`
             const testResponse = await fetch(`/api/playground?file=${encodeURIComponent(testPath)}`, { method: 'HEAD' })
             if (testResponse.ok) {
               filePath = variant
+              foundSolution = true
               break
             }
           } catch {
             // Продолжаем поиск
           }
+        }
+        
+        // Если не нашли файл решения, показываем ошибку
+        if (!foundSolution) {
+          throw new Error('Файл решения не найден')
         }
       }
       
@@ -335,7 +345,23 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
     try {
       let filePath = taskFile
+      
       if (viewMode === 'solution') {
+        // Для файлов решений сначала проверяем, не изменил ли их пользователь
+        const cleanPath = filePath.replace(/^src\//, '')
+        
+        try {
+          const playgroundResponse = await fetch(`/api/playground?file=${encodeURIComponent(`src/${cleanPath}`)}&check=playground`, { method: 'HEAD' })
+          if (playgroundResponse.ok) {
+            // Файл существует в playground, значит пользователь его изменил
+            // НЕ ОБНОВЛЯЕМ такие файлы
+            setSolutionStatus('modified')
+            return
+          }
+        } catch {
+          // Файл не существует в playground, продолжаем
+        }
+        
         // Попробуем разные варианты решений
         const solutionVariants = []
         
@@ -348,12 +374,14 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         }
         
         // Найдем первый существующий файл решения
+        let foundSolution = false
         for (const variant of solutionVariants) {
           try {
             const testPath = `src/${variant.replace(/^src\//, '')}`
             const testResponse = await fetch(`/api/playground?file=${encodeURIComponent(testPath)}`, { method: 'HEAD' })
             if (testResponse.ok) {
               filePath = variant
+              foundSolution = true
               break
             }
           } catch {
@@ -361,19 +389,14 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
           }
         }
         
-        // Для файлов решений проверяем, существует ли файл в playground
-        // Если существует, значит пользователь его изменил, и мы не должны его обновлять
-        const cleanPath = filePath.replace(/^src\//, '')
-        
-        try {
-          const playgroundResponse = await fetch(`/api/playground?file=${encodeURIComponent(`src/${cleanPath}`)}&check=playground`, { method: 'HEAD' })
-          if (playgroundResponse.ok) {
-            // Файл существует в playground, не обновляем его
-            return
-          }
-        } catch {
-          // Файл не существует в playground, можем обновить
+        // Если не нашли файл решения, не обновляем
+        if (!foundSolution) {
+          console.warn('Solution file not found for auto-refresh')
+          setSolutionStatus('notfound')
+          return
         }
+        
+        setSolutionStatus('original')
       }
       
       filePath = filePath.replace(/^src\//, '')
@@ -392,6 +415,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
       }
     } catch (error) {
       // Тихо игнорируем ошибки при автообновлении
+      console.warn('Silent refresh error:', error)
     }
   }
 
@@ -401,6 +425,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
     try {
       let filePath = taskFile
+      
       if (viewMode === 'solution') {
         // Попробуем разные варианты решений
         const solutionVariants = []
@@ -414,17 +439,25 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         }
         
         // Найдем первый существующий файл решения
+        let foundSolution = false
         for (const variant of solutionVariants) {
           try {
             const testPath = `src/${variant.replace(/^src\//, '')}`
             const testResponse = await fetch(`/api/playground?file=${encodeURIComponent(testPath)}`, { method: 'HEAD' })
             if (testResponse.ok) {
               filePath = variant
+              foundSolution = true
               break
             }
           } catch {
             // Продолжаем поиск
           }
+        }
+        
+        // Если не нашли файл решения, показываем ошибку
+        if (!foundSolution) {
+          alert('Файл решения не найден')
+          return
         }
       }
       
@@ -471,6 +504,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
   useEffect(() => {
     if (taskFile) {
+      // Сбрасываем статус решения при смене задания
+      setSolutionStatus('original')
       handleRefresh()
       checkSolutionExists(taskFile).then(setHasSolution)
       loadTaskFiles()
@@ -532,11 +567,25 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 onClick={() => setAutoRefresh(!autoRefresh)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                title={viewMode === 'solution' ? 'Автообновление отключено для решений' : 'Переключить автообновление'}
+                title={
+                  viewMode === 'solution' 
+                    ? solutionStatus === 'modified' 
+                      ? 'Автообновление отключено - файл изменен'
+                      : solutionStatus === 'notfound'
+                      ? 'Файл решения не найден'
+                      : 'Автообновление для исходного решения'
+                    : 'Переключить автообновление'
+                }
               >
                 <RotateCcw size={16} className={autoRefresh ? styles.spinning : ''} />
                 <span>
-                  {autoRefresh ? (viewMode === 'solution' ? 'Авто (решение)' : 'Авто ВКЛ') : 'Авто ВЫКЛ'}
+                  {autoRefresh ? (
+                    viewMode === 'solution' ? (
+                      solutionStatus === 'modified' ? 'Авто (изменено)' :
+                      solutionStatus === 'notfound' ? 'Авто (не найдено)' :
+                      'Авто (решение)'
+                    ) : 'Авто ВКЛ'
+                  ) : 'Авто ВЫКЛ'}
                 </span>
               </motion.button>
 
