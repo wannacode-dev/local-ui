@@ -1,7 +1,7 @@
 {
-  "name": "react-tasks-nextjs",
-  "version": "1.0.0",
-  "description": "Интерактивные задания по React на Next.js",
+  "name": "@wannacode/local-ui",
+  "version": "0.0.1",
+  "description": "Local UI for WannaCode",
   "scripts": {
     "start": "next dev",
     "lint": "next lint",
