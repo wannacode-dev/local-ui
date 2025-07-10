@@ -45,55 +45,15 @@ export default function Home() {
     router.push(url.pathname + url.search)
   }
 
-  const handleViewModeChange = async (mode: 'problem' | 'solution') => {
+  const handleViewModeChange = (mode: 'problem' | 'solution') => {
     console.log('View mode changed:', { mode })
+    setViewMode(mode)
     const url = new URL(window.location.href)
     const currentTask = url.searchParams.get('task')
-    
     if (currentTask) {
-      let newTask = currentTask
-      
-      if (mode === 'solution') {
-        // Переключаемся на решение - проверяем существование файлов решений
-        const solutionVariants = []
-        
-        if (currentTask.includes('.problem.')) {
-          solutionVariants.push(currentTask.replace('.problem.', '.solution.'))
-          solutionVariants.push(currentTask.replace('.problem.', '.решение.'))
-        } else if (currentTask.includes('.проблема.')) {
-          solutionVariants.push(currentTask.replace('.проблема.', '.решение.'))
-          solutionVariants.push(currentTask.replace('.проблема.', '.solution.'))
-        }
-        
-        // Проверяем, какой файл решения существует
-        for (const variant of solutionVariants) {
-          try {
-            const testPath = `src/${variant.replace(/^src\//, '')}`
-            const testResponse = await fetch(`/api/playground?file=${encodeURIComponent(testPath)}`, { method: 'HEAD' })
-            if (testResponse.ok) {
-              newTask = variant
-              break
-            }
-          } catch {
-            // Продолжаем поиск
-          }
-        }
-        
-        // Если не нашли файл решения, остаемся на задании
-        if (newTask === currentTask) {
-          console.warn('Solution file not found, staying on problem')
-          return
-        }
-      } else {
-        // Переключаемся на задание
-        if (currentTask.includes('.solution.')) {
-          newTask = currentTask.replace('.solution.', '.problem.')
-        } else if (currentTask.includes('.решение.')) {
-          newTask = currentTask.replace('.решение.', '.problem.')
-        }
-      }
-      
-      setViewMode(mode)
+      const newTask = mode === 'solution' 
+        ? currentTask.replace('.problem.', '.solution.')
+        : currentTask.replace('.solution.', '.problem.')
       url.searchParams.set('task', newTask)
       router.push(url.pathname + url.search, { scroll: false })
     }
