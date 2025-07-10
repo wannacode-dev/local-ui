@@ -453,7 +453,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         clearInterval(intervalRef.current)
       }
     }
-  }, [autoRefresh, taskFile])
+  }, [autoRefresh, taskFile, viewMode])
 
   useEffect(() => {
     if (taskFile) {
