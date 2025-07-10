@@ -330,53 +330,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// HEAD запрос для проверки существования файла
-export async function HEAD(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const file = searchParams.get('file')
-    const checkPlayground = searchParams.get('check') === 'playground'
-    
-    if (!file) {
-      return new NextResponse(null, { status: 400 })
-    }
-
-    await ensurePlaygroundDir()
-    
-    // Убираем префикс src/ и заменяем на playground/
-    const cleanFile = file.replace(/^src\//, '')
-    const playgroundFile = path.join(PLAYGROUND_DIR, cleanFile)
-    
-    if (checkPlayground) {
-      // Проверяем существование только в playground
-      try {
-        await fs.access(playgroundFile)
-        return new NextResponse(null, { status: 200 })
-      } catch {
-        return new NextResponse(null, { status: 404 })
-      }
-    } else {
-      // Проверяем сначала в playground, затем в src
-      try {
-        await fs.access(playgroundFile)
-        return new NextResponse(null, { status: 200 })
-      } catch {
-        // Проверяем в src
-        const srcFile = path.join(SRC_DIR, cleanFile)
-        try {
-          await fs.access(srcFile)
-          return new NextResponse(null, { status: 200 })
-        } catch {
-          return new NextResponse(null, { status: 404 })
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error checking playground file:', error)
-    return new NextResponse(null, { status: 500 })
-  }
-}
-
 // Копировать файл из src в playground
 export async function POST(request: NextRequest) {
   try {
