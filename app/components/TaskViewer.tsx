@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, RefreshCw, Files, Lightbulb, ExternalLink, Code, RotateCcw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RefreshCw, Files, Lightbulb, ExternalLink, Code, RotateCcw, BookOpen } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import styles from './TaskViewer.module.css'
+import TaskDescription from './TaskDescription'
 
 interface TaskFile {
   name: string
@@ -39,6 +40,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const [taskFiles, setTaskFiles] = useState<TaskFile[]>([])
   const [showFilesDropdown, setShowFilesDropdown] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
+  const [isDescriptionHidden, setIsDescriptionHidden] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -466,7 +468,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   }, [taskFile, viewMode])
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${!isDescriptionHidden ? styles.withDescription : ''}`}>
 
 
       {/* Область результата */}
@@ -560,6 +562,17 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 <ExternalLink size={16} />
                 <span>Новое окно</span>
               </motion.button>
+
+              {/* Показать/скрыть описание */}
+              <motion.button
+                className={`${styles.browserAction} ${styles.descriptionAction}`}
+                onClick={() => setIsDescriptionHidden(!isDescriptionHidden)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <BookOpen size={16} />
+                <span>{isDescriptionHidden ? 'Показать' : 'Скрыть'} описание</span>
+              </motion.button>
             </div>
           </div>
           
@@ -589,7 +602,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
       {/* Footer с навигацией и файлами */}
       <div className={styles.footer}>
-        <div className={styles.footerControls}>
+        <div className={`${styles.footerControls} ${!isDescriptionHidden ? styles.withDescription : ''}`}>
           {/* Навигация */}
           <div className={styles.navigationControls}>
             <motion.button 
@@ -656,6 +669,13 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
           </div>
         </div>
       </div>
+      
+      {/* Описание задания */}
+      <TaskDescription 
+        taskFile={taskFile}
+        isHidden={isDescriptionHidden}
+        onToggleHidden={() => setIsDescriptionHidden(!isDescriptionHidden)}
+      />
     </div>
   )
 } 

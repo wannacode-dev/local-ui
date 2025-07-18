@@ -11,6 +11,11 @@
   padding-bottom: 90px; /* Место для footer */
   border-left: 2px solid #e2e8f0;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+  transition: right 0.3s ease;
+}
+
+.container.withDescription {
+  right: 550px;
 }
 
 
@@ -35,6 +40,11 @@
   margin-left: var(--sidebar-width, 280px);
   padding-left: 24px;
   padding-right: 24px;
+  transition: margin-right 0.3s ease;
+}
+
+.footerControls.withDescription {
+  margin-right: 550px;
 }
 
 .footerNavButton {
@@ -375,6 +385,11 @@
 .newWindowAction:hover {
   background: rgba(139, 92, 246, 0.1);
   color: #8b5cf6;
+}
+
+.descriptionAction:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
 }
 
 .browserContent {
