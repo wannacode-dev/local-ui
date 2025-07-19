@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, RefreshCw, Files, Lightbulb, ExternalLink, Code, RotateCcw, BookOpen } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RefreshCw, Files, Lightbulb, ExternalLink, Code, RotateCcw, BookOpen, Menu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import styles from './TaskViewer.module.css'
 import TaskDescription from './TaskDescription'
@@ -30,9 +30,10 @@ interface TaskViewerProps {
   onViewModeChange: (mode: 'problem' | 'solution') => void
   allTasks: Chapter[]
   onTaskSelect: (taskFile: string) => void
+  onMobileMenuToggle?: () => void
 }
 
-export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTasks, onTaskSelect }: TaskViewerProps) {
+export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTasks, onTaskSelect, onMobileMenuToggle }: TaskViewerProps) {
   const [content, setContent] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -470,6 +471,16 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   return (
     <div className={`${styles.container} ${!isDescriptionHidden ? styles.withDescription : ''}`}>
 
+      {/* Мобильная кнопка меню */}
+      <motion.button
+        className={styles.mobileMenuButton}
+        onClick={onMobileMenuToggle}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        title="Открыть меню"
+      >
+        <Menu size={20} />
+      </motion.button>
 
       {/* Область результата */}
       <div className={styles.content}>

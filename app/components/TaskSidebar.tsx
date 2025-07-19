@@ -86,7 +86,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
   }
 
   return (
-    <div className={styles.sidebar}>
+    <div className={`${styles.sidebar} ${isHidden ? styles.sidebarCollapsed : ''}`}>
       <div className={`${styles.header} ${isHidden ? styles.headerCollapsed : ''}`}>
         {!isHidden && (
           <div className={styles.headerContent}>
@@ -127,7 +127,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
       </div>
       
       <div className={`${styles.chaptersContainer} ${isHidden ? styles.chaptersCollapsed : ''}`}>
-        {tasks.map((chapter, chapterIndex) => (
+        {!isHidden && tasks.map((chapter, chapterIndex) => (
           <div 
             key={chapterIndex} 
             className={styles.chapterItem}
