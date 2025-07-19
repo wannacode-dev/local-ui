@@ -638,47 +638,47 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               <ChevronRight size={16} />
             </motion.button>
           </div>
+        </div>
 
-          {/* Файлы */}
-          <div style={{ position: 'relative' }}>
-            <motion.button
-              className={styles.footerActionButton}
-              onClick={() => setShowFilesDropdown(!showFilesDropdown)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Files size={16} />
-              Файлы
-            </motion.button>
+        {/* Кнопка файлов - зафиксирована справа */}
+        <div className={styles.filesButtonContainer}>
+          <motion.button
+            className={styles.footerActionButton}
+            onClick={() => setShowFilesDropdown(!showFilesDropdown)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Files size={16} />
+            Файлы
+          </motion.button>
 
-            <AnimatePresence>
-              {showFilesDropdown && (
-                <motion.div
-                  className={styles.dropdown}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{ bottom: '100%', top: 'auto' }}
-                >
-                  {taskFiles.map((file, index) => (
-                    <div
-                      key={index}
-                      className={styles.dropdownItem}
-                      onClick={() => {
-                        if (file.canOpenInVSCode) {
-                          handleOpenInVSCode(`playground/${file.path}`)
-                        }
-                        setShowFilesDropdown(false)
-                      }}
-                    >
-                      <Code size={14} />
-                      {file.name}
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <AnimatePresence>
+            {showFilesDropdown && (
+              <motion.div
+                className={styles.dropdown}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                style={{ bottom: '100%', top: 'auto' }}
+              >
+                {taskFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      if (file.canOpenInVSCode) {
+                        handleOpenInVSCode(`playground/${file.path}`)
+                      }
+                      setShowFilesDropdown(false)
+                    }}
+                  >
+                    <Code size={14} />
+                    {file.name}
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       

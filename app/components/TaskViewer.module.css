@@ -61,7 +61,7 @@
 
 .footerControls {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 16px;
   margin-left: var(--sidebar-width, 280px);
@@ -72,6 +72,14 @@
 
 .footerControls.withDescription {
   margin-right: min(550px, 40vw);
+}
+
+.filesButtonContainer {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
 }
 
 .footerNavButton {
