@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, RefreshCw, Files, Lightbulb, ExternalLink, Code, RotateCcw, BookOpen, Menu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import styles from './TaskViewer.module.css'
-import TaskDescription from './TaskDescription'
+
 
 interface TaskFile {
   name: string
@@ -32,9 +32,11 @@ interface TaskViewerProps {
   onTaskSelect: (taskFile: string) => void
   onMobileMenuToggle?: () => void
   sidebarHidden?: boolean
+  isDescriptionHidden?: boolean
+  onToggleDescription?: () => void
 }
 
-export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTasks, onTaskSelect, onMobileMenuToggle, sidebarHidden = false }: TaskViewerProps) {
+export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTasks, onTaskSelect, onMobileMenuToggle, sidebarHidden = false, isDescriptionHidden = false, onToggleDescription }: TaskViewerProps) {
   const [content, setContent] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -42,7 +44,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const [taskFiles, setTaskFiles] = useState<TaskFile[]>([])
   const [showFilesDropdown, setShowFilesDropdown] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
-  const [isDescriptionHidden, setIsDescriptionHidden] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -470,7 +471,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   }, [taskFile, viewMode])
 
   return (
-    <div className={`${styles.container} ${!isDescriptionHidden ? styles.withDescription : ''}`}>
+          <div className={styles.container}>
 
       {/* Мобильная кнопка меню */}
       <motion.button
@@ -578,7 +579,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               {/* Показать/скрыть описание - скрываем на средних экранах при открытом описании или развернутом sidebar */}
               <motion.button
                 className={`${styles.browserAction} ${styles.descriptionAction} ${(!isDescriptionHidden || !sidebarHidden) ? styles.hiddenOnMedium : ''}`}
-                onClick={() => setIsDescriptionHidden(!isDescriptionHidden)}
+                onClick={onToggleDescription}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -614,8 +615,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
       {/* Footer с навигацией и файлами */}
       <div className={styles.footer}>
-        <div className={`${styles.footerControls} ${!isDescriptionHidden ? styles.withDescription : ''}`}>
-          {/* Навигация */}
+        <div className={styles.footerControls}>
+          {/* Навигация слева */}
           <div className={styles.navigationControls}>
             <motion.button 
               className={styles.footerNavButton}
@@ -638,10 +639,12 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               <ChevronRight size={16} />
             </motion.button>
           </div>
-        </div>
 
-        {/* Кнопка файлов - зафиксирована справа */}
-        <div className={styles.filesButtonContainer}>
+          {/* Разделитель */}
+          <div className={styles.footerSeparator}></div>
+
+          {/* Кнопка файлов */}
+          <div className={styles.filesButtonContainer}>
           <motion.button
             className={styles.footerActionButton}
             onClick={() => setShowFilesDropdown(!showFilesDropdown)}
@@ -679,15 +682,10 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </div>
       </div>
       
-      {/* Описание задания */}
-      <TaskDescription 
-        taskFile={taskFile}
-        isHidden={isDescriptionHidden}
-        onToggleHidden={() => setIsDescriptionHidden(!isDescriptionHidden)}
-      />
     </div>
   )
 } 
