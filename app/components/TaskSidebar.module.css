@@ -17,6 +17,34 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Overlay для мобильных устройств */
+.sidebar::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+@media (max-width: 768px) {
+  .sidebar:not(.sidebarCollapsed)::before {
+    opacity: 1;
+    visibility: visible;
+    z-index: -1;
+  }
+}
+
+.sidebarCollapsed {
+  width: 60px;
+  min-width: 60px;
+}
+
 .header {
   padding: 16px;
   background: rgba(255, 255, 255, 0.1);
@@ -305,26 +333,212 @@
 }
 
 /* Адаптивность */
+@media (max-width: 1200px) {
+  .sidebar {
+    width: var(--sidebar-width, 260px);
+    min-width: var(--sidebar-width, 260px);
+  }
+  
+  .sidebarCollapsed {
+    width: 55px;
+    min-width: 55px;
+  }
+  
+  .header {
+    padding: 14px;
+    margin: 10px;
+  }
+  
+  .logoText {
+    font-size: 13px;
+  }
+  
+  .taskCount {
+    font-size: 10px;
+  }
+  
+  .chapterButton {
+    padding: 14px 18px;
+    font-size: 14px;
+  }
+  
+  .taskButton {
+    padding: 12px 18px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: var(--sidebar-width, 240px);
+    min-width: var(--sidebar-width, 240px);
+  }
+  
+  .sidebarCollapsed {
+    width: 50px;
+    min-width: 50px;
+  }
+  
+  .header {
+    padding: 12px;
+    margin: 8px;
+  }
+  
+  .logoText {
+    font-size: 12px;
+  }
+  
+  .taskCount {
+    font-size: 9px;
+  }
+  
+  .chapterButton {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .chapterButtonCollapsed {
+    padding: 10px;
+    margin: 3px 6px;
+  }
+  
+  .taskButton {
+    padding: 10px 16px;
+    font-size: 12px;
+    margin: 4px 10px;
+  }
+  
+  .taskNumber {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
-    width: var(--sidebar-width);
+    width: var(--sidebar-width, 280px);
+    min-width: var(--sidebar-width, 280px);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1200; /* Выше footer */
+    transform: translateX(-100%);
+  }
+  
+  .sidebar:not(.sidebarCollapsed) {
+    transform: translateX(0);
+  }
+  
+  .sidebarCollapsed {
+    transform: translateX(-100%);
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+  }
+  
+  .header {
+    padding: 14px 16px;
+    margin: 12px;
+    border-radius: 10px;
   }
   
   .headerCollapsed {
-    padding: 6px;
-    margin: 6px;
+    padding: 12px;
+    margin: 10px;
+  }
+  
+  .logoText {
+    font-size: 14px;
+  }
+  
+  .taskCount {
+    font-size: 11px;
   }
   
   .toggleButton {
-    min-width: 32px;
-    min-height: 32px;
-    padding: 6px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 10px;
   }
   
-  .toggleButtonCollapsed {
+  .chapterButton {
+    padding: 16px 20px;
+    font-size: 14px;
+  }
+  
+  .taskButton {
+    padding: 14px 20px;
+    font-size: 14px;
+    margin: 6px 12px;
+  }
+  
+  .taskNumber {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100vw;
+    min-width: 100vw;
+  }
+  
+  .header {
+    padding: 12px 14px;
+    margin: 8px;
+  }
+  
+  .logoText {
+    font-size: 13px;
+  }
+  
+  .taskCount {
+    font-size: 10px;
+  }
+  
+  .toggleButton {
     min-width: 36px;
     min-height: 36px;
+    padding: 8px;
+  }
+  
+  .chapterButton {
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  
+  .chapterTitle {
+    font-size: 13px;
+  }
+  
+  .taskButton {
+    padding: 12px 16px;
+    font-size: 13px;
+    margin: 4px 8px;
+    gap: 12px;
+  }
+  
+  .taskNumber {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+  
+  .viewModeIndicator {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+}
+
+/* Улучшение скроллбара для мобильных */
+@media (max-width: 768px) {
+  .sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 2px;
   }
 } 
