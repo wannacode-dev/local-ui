@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import TaskSidebar from './components/TaskSidebar'
 import TaskViewer from './components/TaskViewer'
+import TaskDescription from './components/TaskDescription'
 import { useSearchParams, useRouter } from 'next/navigation'
 import styles from './page.module.css'
 
@@ -11,6 +12,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'problem' | 'solution'>('problem')
   const [tasks, setTasks] = useState<any[]>([])
   const [sidebarHidden, setSidebarHidden] = useState(false)
+  const [isDescriptionHidden, setIsDescriptionHidden] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -60,7 +62,10 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.container} style={{ '--sidebar-hidden': sidebarHidden ? '1' : '0' } as any}>
+    <div className={styles.container} style={{ 
+      '--sidebar-hidden': sidebarHidden ? '1' : '0',
+      '--description-width': isDescriptionHidden ? '0px' : 'min(550px, 40vw)'
+    } as any}>
       <div className={`${styles.sidebar} ${sidebarHidden ? styles.hidden : ''}`}>
         <TaskSidebar 
           tasks={tasks} 
@@ -81,6 +86,8 @@ export default function Home() {
             onTaskSelect={handleTaskSelect}
             onMobileMenuToggle={() => setSidebarHidden(!sidebarHidden)}
             sidebarHidden={sidebarHidden}
+            isDescriptionHidden={isDescriptionHidden}
+            onToggleDescription={() => setIsDescriptionHidden(!isDescriptionHidden)}
           />
         ) : (
           <div className="emptyState">
@@ -88,6 +95,15 @@ export default function Home() {
           </div>
         )}
       </div>
+      
+      {/* Правый сайдбар с описанием */}
+      {selectedTask && (
+        <TaskDescription 
+          taskFile={selectedTask}
+          isHidden={isDescriptionHidden}
+          onToggleHidden={() => setIsDescriptionHidden(!isDescriptionHidden)}
+        />
+      )}
     </div>
   )
 } 
