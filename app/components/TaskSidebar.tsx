@@ -88,28 +88,36 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
   return (
     <div className={`${styles.sidebar} ${isHidden ? styles.sidebarCollapsed : ''}`}>
       <div className={`${styles.header} ${isHidden ? styles.headerCollapsed : ''}`}>
-        {!isHidden && (
-          <div className={styles.headerContent}>
-            <div className={styles.logo}>
-              <Code2 size={20} className={styles.logoIcon} />
-              <span className={styles.logoText}>
-                {(() => {
-                  // Находим название текущего задания
-                  if (!selectedTask) return 'Курс'
-                  
-                  for (const chapter of tasks) {
-                    const task = chapter.tasks.find(t => isTaskSelected(t.file))
-                    if (task) return task.name
-                  }
-                  return 'Курс'
-                })()}
-              </span>
-            </div>
-            <div className={styles.taskCount}>
-              {tasks.reduce((total, chapter) => total + chapter.tasks.length, 0)} заданий
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {!isHidden && (
+            <motion.div 
+              className={styles.headerContent}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className={styles.logo}>
+                <Code2 size={20} className={styles.logoIcon} />
+                <span className={styles.logoText}>
+                  {(() => {
+                    // Находим название текущего задания
+                    if (!selectedTask) return 'Курс'
+                    
+                    for (const chapter of tasks) {
+                      const task = chapter.tasks.find(t => isTaskSelected(t.file))
+                      if (task) return task.name
+                    }
+                    return 'Курс'
+                  })()}
+                </span>
+              </div>
+              <div className={styles.taskCount}>
+                {tasks.reduce((total, chapter) => total + chapter.tasks.length, 0)} заданий
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         <motion.button
           className={`${styles.toggleButton} ${isHidden ? styles.toggleButtonCollapsed : ''}`}
@@ -119,7 +127,7 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
           title={isHidden ? "Развернуть боковое меню" : "Свернуть боковое меню"}
         >
           {isHidden ? (
-            <ChevronsRight size={20} />
+            <ChevronRight size={16} />
           ) : (
             <PanelLeftClose size={16} />
           )}
@@ -127,7 +135,15 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
       </div>
       
       <div className={`${styles.chaptersContainer} ${isHidden ? styles.chaptersCollapsed : ''}`}>
-        {!isHidden && tasks.map((chapter, chapterIndex) => (
+        <AnimatePresence>
+          {!isHidden && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {tasks.map((chapter, chapterIndex) => (
           <div 
             key={chapterIndex} 
             className={styles.chapterItem}
@@ -220,6 +236,9 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
             </AnimatePresence>
           </div>
         ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
