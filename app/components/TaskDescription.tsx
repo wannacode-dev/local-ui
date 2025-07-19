@@ -182,6 +182,18 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
                           {String(children).replace(/\n$/, '')}
                         </CodeBlock>
                       )
+                    },
+                    a({ node, children, href, ...props }) {
+                      return (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          {...props}
+                        >
+                          {children}
+                        </a>
+                      )
                     }
                   }}
                 >
