@@ -31,9 +31,10 @@ interface TaskViewerProps {
   allTasks: Chapter[]
   onTaskSelect: (taskFile: string) => void
   onMobileMenuToggle?: () => void
+  sidebarHidden?: boolean
 }
 
-export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTasks, onTaskSelect, onMobileMenuToggle }: TaskViewerProps) {
+export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTasks, onTaskSelect, onMobileMenuToggle, sidebarHidden = false }: TaskViewerProps) {
   const [content, setContent] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -494,8 +495,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               <div className={styles.browserDot} style={{ background: '#28ca42' }}></div>
             </div>
             
-            {/* Адресная строка с информацией */}
-            <div className={styles.addressBar}>
+            {/* Адресная строка с информацией - скрываем на средних экранах при открытом описании или развернутом sidebar */}
+            <div className={`${styles.addressBar} ${(!isDescriptionHidden || !sidebarHidden) ? styles.addressBarHidden : ''}`}>
               <div className={styles.addressContent}>
                 <span className={styles.addressTopic}>
                   {formatBreadcrumbName(topic)}
@@ -510,8 +511,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               </div>
             </div>
             
-            {/* Кнопки управления */}
-            <div className={styles.browserControls}>
+            {/* Кнопки управления - адаптируем для средних экранов */}
+            <div className={`${styles.browserControls} ${(!isDescriptionHidden || !sidebarHidden) ? styles.browserControlsCompact : ''}`}>
               {/* Обновить - скрываем при автообновлении */}
               {!autoRefresh && (
                 <motion.button
@@ -547,7 +548,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 <span>Сбросить</span>
               </motion.button>
 
-              {/* Разделитель */}
+              {/* Разделитель - скрываем на средних экранах при открытом описании */}
               <div className={styles.browserSeparator}></div>
 
               {/* Посмотреть решение */}
@@ -574,9 +575,9 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 <span>Новое окно</span>
               </motion.button>
 
-              {/* Показать/скрыть описание */}
+              {/* Показать/скрыть описание - скрываем на средних экранах при открытом описании или развернутом sidebar */}
               <motion.button
-                className={`${styles.browserAction} ${styles.descriptionAction}`}
+                className={`${styles.browserAction} ${styles.descriptionAction} ${(!isDescriptionHidden || !sidebarHidden) ? styles.hiddenOnMedium : ''}`}
                 onClick={() => setIsDescriptionHidden(!isDescriptionHidden)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

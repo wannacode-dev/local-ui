@@ -80,6 +80,7 @@ export default function Home() {
             allTasks={tasks}
             onTaskSelect={handleTaskSelect}
             onMobileMenuToggle={() => setSidebarHidden(!sidebarHidden)}
+            sidebarHidden={sidebarHidden}
           />
         ) : (
           <div className="emptyState">

@@ -55,7 +55,7 @@
   background: white;
   border-top: 1px solid #e2e8f0;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 150;
+  z-index: 170;
   padding: 12px 20px;
 }
 
@@ -790,5 +790,55 @@
   .dropdownItem {
     padding: 10px 12px;
     font-size: 12px;
+  }
+} 
+
+/* Адаптивность для средних экранов */
+@media (max-width: 1280px) {
+  .addressBarHidden {
+    display: none;
+  }
+  
+  .browserControlsCompact {
+    gap: 2px;
+  }
+  
+  .browserControlsCompact .browserAction {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  
+  .browserControlsCompact .browserAction span {
+    display: none;
+  }
+  
+  .browserControlsCompact .browserSeparator {
+    display: none !important;
+  }
+  
+  .hiddenOnMedium {
+    display: none;
+  }
+  
+  .browserHeader {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+  
+  /* Дополнительное сжатие при развернутом sidebar */
+  .container:not(.withDescription) .browserControlsCompact .browserAction {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+}
+
+/* Для больших экранов - показываем все элементы */
+@media (min-width: 1281px) {
+  .addressBarHidden {
+    display: flex;
+  }
+  
+  .hiddenOnMedium {
+    display: flex;
   }
 } 
