@@ -13,17 +13,16 @@ export async function GET(request: Request) {
 
     // Извлекаем путь к папке задания
     const taskPath = taskFile.replace(/\/[^/]+$/, '') // убираем имя файла, оставляем путь к папке
-    const readmePath = path.join(process.cwd(), 'src', taskPath, 'README.md')
+    const readmePath = path.join(process.cwd(), 'src', taskPath, 'README.mdx')
     
     // Проверяем существование файла
     if (!fs.existsSync(readmePath)) {
-      return NextResponse.json({ error: 'README.md не найден для этого задания' }, { status: 404 })
+      return NextResponse.json({ error: 'README.mdx не найден для этого задания' }, { status: 404 })
     }
     
-    // Читаем содержимое файла
+    // Читаем и возвращаем содержимое файла
     const content = fs.readFileSync(readmePath, 'utf-8')
     
-    // Возвращаем содержимое как текст
     return new NextResponse(content, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
@@ -31,7 +30,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Error reading README.md:', error)
-    return NextResponse.json({ error: 'Ошибка чтения README.md' }, { status: 500 })
+    console.error('Error reading README.mdx:', error)
+    return NextResponse.json({ error: 'Ошибка чтения README.mdx' }, { status: 500 })
   }
 } 
