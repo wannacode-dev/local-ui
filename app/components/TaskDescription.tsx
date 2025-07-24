@@ -3,11 +3,32 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BookOpen, PanelRightClose, Copy, Check } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
+import { MDXRemote } from 'next-mdx-remote'
+import { serialize } from 'next-mdx-remote/serialize'
+import type { MDXRemoteSerializeResult } from 'next-mdx-remote'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import styles from './TaskDescription.module.css'
+
+// Импорт новых MDX компонентов
+import { 
+  TaskLayout,
+  TaskObjective,
+  TaskImportant,
+  TaskConcepts,
+  TaskHints,
+  TaskLinks,
+  TaskPreview,
+  CodeExample,
+  Solution,
+  Info,
+  Warning,
+  Concept,
+  Step,
+  Success,
+  DocsExample
+} from './mdx'
 
 interface TaskDescriptionProps {
   taskFile: string
@@ -71,7 +92,7 @@ function CodeBlock({ children, className }: CodeBlockProps) {
 }
 
 export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: TaskDescriptionProps) {
-  const [description, setDescription] = useState<string>('')
+  const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -86,13 +107,23 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
       
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('README.md не найден для этого задания')
+          throw new Error('README.mdx не найден для этого задания')
         }
         throw new Error(`Ошибка загрузки: ${response.statusText}`)
       }
       
       const content = await response.text()
-      setDescription(content)
+      
+      // Сериализуем MDX с помощью next-mdx-remote
+      const mdxSource = await serialize(content, {
+        parseFrontmatter: true,
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [],
+        },
+      })
+      
+      setMdxSource(mdxSource)
     } catch (error) {
       console.error('Error loading task description:', error)
       setError(error instanceof Error ? error.message : 'Ошибка загрузки описания')
@@ -157,17 +188,56 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
               </div>
             )}
 
-            {description && !isLoading && (
+            {mdxSource && !isLoading && (
               <motion.div 
                 className={styles.description}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
+                <MDXRemote 
+                  {...mdxSource}
                   components={{
-                    code({ node, className, children, ...props }) {
+                    // Новые React компоненты для обучающих материалов
+                    TaskLayout,
+                    TaskObjective,
+                    TaskImportant,
+                    TaskConcepts,
+                    TaskHints,
+                    TaskLinks,
+                    TaskPreview,
+                    CodeExample,
+                    Solution,
+                    Info,
+                    Warning,
+                    Concept,
+                    Step,
+                    Success,
+                    DocsExample,
+                    
+                    // Обратная совместимость со старыми div блоками
+                    div: ({ className, children, ...props }) => {
+                      if (className?.includes('task-preview')) {
+                        return <TaskPreview>{children}</TaskPreview>
+                      }
+                      if (className?.includes('docs-example')) {
+                        return <DocsExample>{children}</DocsExample>
+                      }
+                      if (className?.includes('concept')) {
+                        return <Concept>{children}</Concept>
+                      }
+                      if (className?.includes('step')) {
+                        return <Step>{children}</Step>
+                      }
+                      if (className?.includes('info')) {
+                        return <Info>{children}</Info>
+                      }
+                      if (className?.includes('warning')) {
+                        return <Warning>{children}</Warning>
+                      }
+                      return <div className={className} {...props}>{children}</div>
+                    },
+                    code({ className, children, ...props }) {
                       const isInline = !className || !className.startsWith('language-')
                       
                       if (isInline) {
@@ -183,7 +253,7 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
                         </CodeBlock>
                       )
                     },
-                    a({ node, children, href, ...props }) {
+                    a({ href, children, ...props }) {
                       return (
                         <a
                           href={href}
@@ -194,11 +264,28 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
                           {children}
                         </a>
                       )
-                    }
+                    },
+                    details: ({ children, ...props }) => (
+                      <details className={styles.details} {...props}>
+                        {children}
+                      </details>
+                    ),
+                    summary: ({ children, ...props }) => (
+                      <summary className={styles.summary} {...props}>
+                        {children}
+                      </summary>
+                    ),
+                    // Интерактивный компонент для демонстрации
+                    InteractiveExample: ({ title, children }) => (
+                      <div className={styles.interactiveExample}>
+                        <h4 className={styles.interactiveTitle}>🎯 {title}</h4>
+                        <div className={styles.interactiveContent}>
+                          {children}
+                        </div>
+                      </div>
+                    ),
                   }}
-                >
-                  {description}
-                </ReactMarkdown>
+                />
               </motion.div>
             )}
           </motion.div>
