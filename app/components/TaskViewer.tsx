@@ -659,26 +659,44 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
             {showFilesDropdown && (
               <motion.div
                 className={styles.dropdown}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                style={{ bottom: '100%', top: 'auto' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
               >
-                {taskFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className={styles.dropdownItem}
-                    onClick={() => {
-                      if (file.canOpenInVSCode) {
-                        handleOpenInVSCode(`playground/${file.path}`)
-                      }
-                      setShowFilesDropdown(false)
-                    }}
-                  >
-                    <Code size={14} />
-                    {file.name}
-                  </div>
-                ))}
+                <div className={styles.dropdownHeader}>
+                  <Files size={16} />
+                  Файлы задания ({taskFiles.length})
+                </div>
+                <div className={styles.dropdownContent}>
+                  {taskFiles.length > 0 ? (
+                    taskFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className={styles.dropdownItem}
+                        onClick={() => {
+                          if (file.canOpenInVSCode) {
+                            handleOpenInVSCode(`playground/${file.path}`)
+                          }
+                          setShowFilesDropdown(false)
+                        }}
+                        title={`${file.canOpenInVSCode ? 'Нажмите, чтобы открыть в VS Code' : 'Недоступно для редактирования'}`}
+                      >
+                        <Code size={16} />
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                          <span style={{ fontWeight: '600' }}>{file.name}</span>
+                          <span style={{ fontSize: '12px', opacity: 0.7, marginTop: '2px' }}>
+                            {file.type === 'problem' ? 'Задание' : file.type === 'solution' ? 'Решение' : 'Файл'} • .{file.extension}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className={styles.emptyDropdown}>
+                      Файлы не найдены
+                    </div>
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

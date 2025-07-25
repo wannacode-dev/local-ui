@@ -525,322 +525,394 @@
   background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
 } 
 
-/* MDX блоки - Светлая красивая тема */
-.taskPreview {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border: 2px solid #93c5fd;
-  color: #1e40af;
-  padding: 28px;
-  border-radius: 20px;
-  margin: 28px 0;
-  box-shadow: 
-    0 8px 32px rgba(59, 130, 246, 0.12),
-    0 4px 16px rgba(59, 130, 246, 0.08);
-  position: relative;
+/* MDX компоненты - чистый дизайн без границ */
+
+/* Общие стили для блоков */
+.taskLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.taskHeader {
+  margin-bottom: 16px;
+}
+
+.taskTitle {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.taskDescription {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.taskContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Заголовки блоков */
+.blockHeader {
+  margin-bottom: 16px;
+}
+
+.blockIcon {
+  display: none;
+}
+
+.blockTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.blockContent {
+  line-height: 1.7;
+  color: #475569;
+}
+
+/* TaskObjective - цель задания */
+.taskObjective {
+  margin: 0;
+}
+
+.taskObjective .blockTitle {
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* TaskConcepts - ключевые концепции */
+.taskConcepts {
+  margin: 0;
+}
+
+.taskConcepts .blockTitle {
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* TaskImportant - важная информация */
+.taskImportant {
+  margin: 0;
+}
+
+.taskImportant .blockTitle {
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* TaskHints - подсказки */
+.taskHints {
+  margin: 0;
+}
+
+.taskHints .blockTitle {
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.hintsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hintDetails {
+  background: #f8fafc;
+  border-radius: 6px;
   overflow: hidden;
 }
 
-.taskPreview::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+.hintSummary {
+  background: #f1f5f9;
+  padding: 16px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #475569;
+  list-style: none;
+  user-select: none;
+  transition: all 0.2s ease;
 }
 
-.taskPreview h2 {
+.hintSummary:hover {
+  background: #e2e8f0;
+}
+
+.hintSummary::-webkit-details-marker {
+  display: none;
+}
+
+.hintContent {
+  padding: 16px;
+  background: #ffffff;
+  color: #64748b;
+}
+
+/* TaskLinks - полезные ссылки */
+.taskLinks {
+  margin: 0;
+}
+
+.taskLinks .blockTitle {
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.linksContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linkItem {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.linkItem:hover {
+  background: #f1f5f9;
+}
+
+.linkTitle {
+  font-weight: 600;
   color: #1e40af;
-  margin-top: 0;
-  font-size: 1.3rem;
-  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.linkDescription {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* TaskPreview - предварительный просмотр */
+.taskPreview {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.taskPreview .blockTitle {
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
   margin-bottom: 16px;
 }
 
 .taskPreview .preview {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 16px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 6px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
   line-height: 1.6;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #1e40af;
-  font-weight: 500;
+  color: #1e293b;
+  white-space: pre-wrap;
+  margin-top: 12px;
 }
 
+/* CodeExample - примеры кода */
+.codeExample {
+  margin: 0;
+}
+
+.codeExample .blockTitle {
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Solution - решение в виде раскрывающегося блока */
+.solutionContent {
+  padding: 16px;
+  background: #ffffff;
+  color: #64748b;
+}
+
+.solutionCode {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 6px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+  overflow-x: auto;
+}
+
+.solutionExplanation {
+  background: #f0fdf4;
+  padding: 16px;
+  border-radius: 6px;
+  color: #166534;
+}
+
+/* Success - используется для критериев успеха */  
+.success {
+  margin: 0;
+}
+
+.success .blockTitle {
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Info - информационные блоки */
+.info {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 0;
+  color: #475569;
+}
+
+/* Warning - предупреждения */
+.warning {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 0;
+  color: #475569;
+}
+
+/* Concept - концепции */
+.concept {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 0;
+  color: #475569;
+}
+
+/* Step - шаги */
+.step {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 0;
+  color: #475569;
+}
+
+/* DocsExample - примеры из документации */
 .docsExample {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border: 2px solid #86efac;
-  padding: 28px;
-  border-radius: 20px;
-  margin: 28px 0;
-  box-shadow: 
-    0 8px 32px rgba(34, 197, 94, 0.12),
-    0 4px 16px rgba(34, 197, 94, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.docsExample::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #10b981, #059669, #047857);
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 0;
+  color: #475569;
 }
 
 .docsExample h3 {
-  color: #166534;
-  margin-top: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 16px;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
 }
 
-.concept {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #fbbf24;
-  padding: 28px;
-  border-radius: 20px;
-  margin: 28px 0;
-  box-shadow: 
-    0 8px 32px rgba(251, 191, 36, 0.12),
-    0 4px 16px rgba(251, 191, 36, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.concept::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #f59e0b, #d97706, #b45309);
-}
-
-.concept strong {
-  color: #92400e;
-  display: block;
-  margin-bottom: 16px;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.step {
-  background: linear-gradient(135deg, #ecfccb 0%, #d9f99d 100%);
-  border: 2px solid #a3e635;
-  padding: 28px;
-  border-radius: 20px;
-  margin: 20px 0;
-  box-shadow: 
-    0 8px 32px rgba(163, 230, 53, 0.12),
-    0 4px 16px rgba(163, 230, 53, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.step::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #84cc16, #65a30d, #4d7c0f);
-}
-
-.step strong {
-  color: #365314;
-  display: block;
-  margin-bottom: 16px;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.info {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 2px solid #7dd3fc;
-  padding: 28px;
-  border-radius: 20px;
-  margin: 28px 0;
-  box-shadow: 
-    0 8px 32px rgba(125, 211, 252, 0.12),
-    0 4px 16px rgba(125, 211, 252, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.info::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #0ea5e9, #0284c7, #0369a1);
-}
-
-.info strong {
-  color: #0c4a6e;
-  display: block;
-  margin-bottom: 16px;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.warning {
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  border: 2px solid #fca5a5;
-  padding: 28px;
-  border-radius: 20px;
-  margin: 28px 0;
-  box-shadow: 
-    0 8px 32px rgba(252, 165, 165, 0.12),
-    0 4px 16px rgba(252, 165, 165, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.warning::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ef4444, #dc2626, #b91c1c);
-}
-
-.warning strong {
-  color: #991b1b;
-  display: block;
-  margin-bottom: 16px;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-/* Интерактивные решения */
+/* Стили для подсказок остаются для совместимости */
 .details {
-  background: linear-gradient(135deg, #fafbff 0%, #f1f5f9 100%);
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
-  margin: 28px 0;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 4px 16px rgba(100, 116, 139, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.details:hover {
-  box-shadow: 
-    0 8px 32px rgba(100, 116, 139, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
-.details[open] {
-  background: #ffffff;
-  border-color: #667eea;
-  box-shadow: 
-    0 8px 32px rgba(102, 126, 234, 0.15),
-    0 4px 16px rgba(102, 126, 234, 0.08);
+  margin: 12px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .summary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px 28px;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 16px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 500;
+  color: #475569;
   list-style: none;
   user-select: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.summary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.6s;
-}
-
-.summary:hover::before {
-  transform: translateX(100%);
+  transition: all 0.2s ease;
 }
 
 .summary:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-  transform: translateY(-1px);
+  background: rgba(102, 126, 234, 0.15);
 }
 
 .summary::-webkit-details-marker {
   display: none;
 }
 
-.solutionExplanation {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border: 2px solid #86efac;
-  padding: 24px 28px;
-  border-radius: 16px;
-  margin-top: 24px;
-  position: relative;
-  overflow: hidden;
-}
-
-.solutionExplanation::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #10b981, #059669, #047857);
-}
-
-.solutionExplanation strong {
-  color: #166534;
-  display: block;
-  margin-bottom: 20px;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-/* Улучшаем отображение списков в блоках */
-.concept ul,
-.step ul,
-.info ul,
-.warning ul,
-.docsExample ul,
-.taskPreview ul {
-  margin: 16px 0;
-  padding-left: 24px;
-}
-
-.concept li,
-.step li,
-.info li,
-.warning li,
-.docsExample li,
-.taskPreview li {
-  margin: 12px 0;
+/* Стили для контента внутри блоков */
+.blockContent p {
+  margin: 0 0 16px 0;
   line-height: 1.7;
   font-size: 15px;
+}
+
+.blockContent p:last-child {
+  margin-bottom: 0;
+}
+
+.blockContent ul,
+.blockContent ol {
+  margin: 12px 0;
+  padding-left: 20px;
+}
+
+.blockContent li {
+  margin: 8px 0;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.blockContent strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.blockContent code {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* Чекбоксы для критериев успеха */
@@ -862,72 +934,73 @@
   overflow: hidden;
 }
 
-/* Анимация для details/summary */
-.details[open] .summary {
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-}
 
-/* Responsive для MDX блоков */
+
+/* Адаптивные стили для MDX компонентов */
 @media (max-width: 768px) {
-  .taskPreview,
-  .docsExample,
-  .concept,
-  .step,
-  .info,
-  .warning,
-  .solutionExplanation {
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 16px;
+  .taskTitle {
+    font-size: 24px;
   }
   
-  .taskPreview .preview {
+  .taskDescription {
+    font-size: 15px;
+  }
+  
+  .taskContent {
+    gap: 6px;
+  }
+  
+  .taskObjective,
+  .taskConcepts,
+  .taskImportant, 
+  .taskHints,
+  .taskLinks,
+  .taskPreview,
+  .codeExample,
+  .success,
+  .info,
+  .warning,
+  .concept,
+  .step,
+  .docsExample {
     padding: 16px;
+    margin: 0;
+    border-radius: 6px;
+  }
+  
+  .blockHeader {
+    margin-bottom: 12px;
+  }
+  
+  .blockTitle {
+    font-size: 18px;
+  }
+  
+  .blockContent {
     font-size: 14px;
   }
   
-  .summary {
-    padding: 16px 20px;
+  .hintSummary {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .hintContent {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .linkItem {
+    padding: 12px;
+  }
+  
+  .linkTitle {
     font-size: 15px;
+  }
+  
+  .linkDescription {
+    font-size: 13px;
   }
 }
 
-/* Интерактивный пример */
-.interactiveExample {
-  border: 2px solid #3b82f6;
-  border-radius: 20px;
-  padding: 28px;
-  margin: 24px 0;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 8px 32px rgba(59, 130, 246, 0.12),
-    0 4px 16px rgba(59, 130, 246, 0.08);
-}
-
-.interactiveExample::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
-}
-
-.interactiveTitle {
-  color: #1e40af;
-  margin: 0 0 16px 0;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.interactiveContent {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
-} 
+ 
