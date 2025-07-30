@@ -8,7 +8,7 @@ import { serialize } from 'next-mdx-remote/serialize'
 import type { MDXRemoteSerializeResult } from 'next-mdx-remote'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import styles from './TaskDescription.module.css'
 
 // Импорт новых MDX компонентов
@@ -44,6 +44,7 @@ interface CodeBlockProps {
 // Компонент для блока кода с кнопкой копирования
 function CodeBlock({ children, className }: CodeBlockProps) {
   const [copied, setCopied] = useState(false)
+  const [error, setError] = useState(false)
   
   const match = /language-(\w+)/.exec(className || '')
   const language = match ? match[1] : 'javascript'
@@ -55,33 +56,25 @@ function CodeBlock({ children, className }: CodeBlockProps) {
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Ошибка копирования:', err)
+      setError(true)
+      setTimeout(() => setError(false), 500)
     }
   }
 
   return (
     <div className={styles.codeBlock}>
       <div className={styles.codeHeader}>
-        <span className={styles.language}>{language}</span>
         <button
-          className={styles.copyButton}
+          className={`${styles.copyButton} ${copied ? styles.copied : ''} ${error ? styles.error : ''}`}
           onClick={handleCopy}
-          title="Копировать код"
+          title={copied ? 'Скопировано!' : error ? 'Ошибка копирования!' : 'Копировать код'}
         >
           {copied ? <Check size={16} /> : <Copy size={16} />}
-          {copied ? 'Скопировано!' : 'Копировать'}
         </button>
       </div>
       <SyntaxHighlighter
         language={language}
-        style={tomorrow}
-        customStyle={{
-          margin: 0,
-          borderRadius: '0 0 8px 8px',
-          fontSize: '15px',
-          lineHeight: '1.5',
-          background: '#2d3748',
-          color: '#e2e8f0'
-        }}
+        style={materialDark}
         showLineNumbers={false}
         wrapLongLines={true}
       >
