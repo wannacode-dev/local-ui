@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, RefreshCw, Files, Lightbulb, ExternalLink, Code, RotateCcw, BookOpen, Menu } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RefreshCw, Files, Lightbulb, ExternalLink, Code, RotateCcw, BookOpen, Menu, X, RotateCw as RotateCwClockwise } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import styles from './TaskViewer.module.css'
 
@@ -534,19 +534,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <RotateCcw size={16} className={autoRefresh ? styles.spinning : ''} />
+                <RotateCwClockwise size={16} className={autoRefresh ? styles.spinning : ''} />
                 <span>{autoRefresh ? 'Авто ВКЛ' : 'Авто ВЫКЛ'}</span>
-              </motion.button>
-
-              {/* Сбросить */}
-              <motion.button
-                className={`${styles.browserAction} ${styles.resetAction}`}
-                onClick={handleReset}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <RotateCcw size={16} />
-                <span>Сбросить</span>
               </motion.button>
 
               {/* Разделитель - скрываем на средних экранах при открытом описании */}
@@ -555,13 +544,13 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               {/* Посмотреть решение */}
               {hasSolution && (
                 <motion.button
-                  className={`${styles.browserAction} ${styles.solutionAction}`}
+                  className={`${styles.browserAction} ${styles.solutionAction} ${viewMode === 'solution' ? styles.solutionActiveAction : ''}`}
                   onClick={() => onViewModeChange(viewMode === 'problem' ? 'solution' : 'problem')}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <Lightbulb size={16} />
-                  <span>{viewMode === 'problem' ? 'Решение' : 'Задание'}</span>
+                  <span>Решение</span>
                 </motion.button>
               )}
 
@@ -576,9 +565,9 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 <span>Новое окно</span>
               </motion.button>
 
-              {/* Показать/скрыть описание - скрываем на средних экранах при открытом описании или развернутом sidebar */}
+              {/* Показать/скрыть описание - всегда видна для управления */}
               <motion.button
-                className={`${styles.browserAction} ${styles.descriptionAction} ${(!isDescriptionHidden || !sidebarHidden) ? styles.hiddenOnMedium : ''}`}
+                className={`${styles.browserAction} ${styles.descriptionAction} ${!isDescriptionHidden ? styles.descriptionActiveAction : ''}`}
                 onClick={onToggleDescription}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -616,43 +605,52 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
       {/* Footer с навигацией и файлами */}
       <div className={styles.footer}>
         <div className={styles.footerControls}>
-          {/* Навигация слева */}
-          <div className={styles.navigationControls}>
-            <motion.button 
-              className={styles.footerNavButton}
-              onClick={handlePreviousTask}
-              disabled={!hasPreviousTask}
-              whileHover={{ scale: hasPreviousTask ? 1.02 : 1 }}
-              whileTap={{ scale: hasPreviousTask ? 0.98 : 1 }}
+          {/* Левая группа: навигация + файлы */}
+          <div className={styles.leftControls}>
+            <div className={styles.navigationControls}>
+              <motion.button 
+                className={styles.footerNavButton}
+                onClick={handlePreviousTask}
+                disabled={!hasPreviousTask}
+                whileHover={{ scale: hasPreviousTask ? 1.02 : 1 }}
+                whileTap={{ scale: hasPreviousTask ? 0.98 : 1 }}
+              >
+                <ChevronLeft size={16} />
+                Предыдущее
+              </motion.button>
+              <motion.button 
+                className={styles.footerNavButton}
+                onClick={handleNextTask}
+                disabled={!hasNextTask}
+                whileHover={{ scale: hasNextTask ? 1.02 : 1 }}
+                whileTap={{ scale: hasNextTask ? 0.98 : 1 }}
+              >
+                Следующее
+                <ChevronRight size={16} />
+              </motion.button>
+            </div>
+
+            {/* Кнопка файлов */}
+            <motion.button
+              className={styles.footerActionButton}
+              onClick={() => setShowFilesDropdown(!showFilesDropdown)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <ChevronLeft size={16} />
-              Предыдущее
-            </motion.button>
-            <motion.button 
-              className={styles.footerNavButton}
-              onClick={handleNextTask}
-              disabled={!hasNextTask}
-              whileHover={{ scale: hasNextTask ? 1.02 : 1 }}
-              whileTap={{ scale: hasNextTask ? 0.98 : 1 }}
-            >
-              Следующее
-              <ChevronRight size={16} />
+              <Files size={16} />
+              Файлы
             </motion.button>
           </div>
 
-          {/* Разделитель */}
-          <div className={styles.footerSeparator}></div>
-
-          {/* Кнопка файлов */}
-          <div className={styles.filesButtonContainer}>
+          {/* Кнопка сброса справа */}
           <motion.button
-            className={styles.footerActionButton}
-            onClick={() => setShowFilesDropdown(!showFilesDropdown)}
+            className={`${styles.footerActionButton} ${styles.resetAction}`}
+            onClick={handleReset}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Files size={16} />
-            Файлы
+            <X size={16} />
+            Сбросить
           </motion.button>
 
           <AnimatePresence>
@@ -700,7 +698,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               </motion.div>
             )}
           </AnimatePresence>
-          </div>
         </div>
       </div>
       
