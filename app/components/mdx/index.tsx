@@ -220,6 +220,9 @@ interface InfoProps {
 export function Info({ children }: InfoProps) {
   return (
     <div className={styles.info}>
+      <div className={styles.blockHeader}>
+        <h3 className={styles.blockTitle}>ℹ️ Информация</h3>
+      </div>
       <div className={styles.blockContent}>
         {children}
       </div>
@@ -234,6 +237,9 @@ interface WarningProps {
 export function Warning({ children }: WarningProps) {
   return (
     <div className={styles.warning}>
+      <div className={styles.blockHeader}>
+        <h3 className={styles.blockTitle}>⚠️ Предупреждение</h3>
+      </div>
       <div className={styles.blockContent}>
         {children}
       </div>
