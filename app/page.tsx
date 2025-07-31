@@ -25,7 +25,6 @@ export default function Home() {
     
     if (task) {
       setSelectedTask(task)
-      // Определяем режим просмотра на основе имени файла
       setViewMode(task.includes('.solution.') ? 'solution' : 'problem')
     }
   }, [searchParams])
@@ -96,7 +95,6 @@ export default function Home() {
         )}
       </div>
       
-      {/* Правый сайдбар с описанием */}
       {selectedTask && (
         <TaskDescription 
           taskFile={selectedTask}

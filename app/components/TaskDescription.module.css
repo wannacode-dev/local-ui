@@ -353,7 +353,6 @@
   font-weight: 500;
 }
 
-/* Блоки кода */
 .codeBlock {
   margin: 24px 0;
   border-radius: 16px;
@@ -437,13 +436,11 @@
   transition: transform 0.1s ease;
 }
 
-/* Анимация успешного копирования */
 .copyButton.copied {
   background: rgba(34, 197, 94, 0.8);
   animation: copySuccess 0.6s ease;
 }
 
-/* Анимация ошибки копирования */
 .copyButton.error {
   background: rgba(239, 68, 68, 0.8);
   animation: copyError 0.5s ease;
@@ -480,7 +477,6 @@
   }
 }
 
-/* Пульсация при успешном копировании */
 .copyButton.copied::after {
   content: '';
   position: absolute;
@@ -507,7 +503,6 @@
   }
 }
 
-/* Анимация иконки */
 .copyButton svg {
   transition: all 0.3s ease;
   transform-origin: center;
@@ -535,7 +530,6 @@
   }
 }
 
-/* Эффект при появлении кнопки */
 .codeHeader {
   display: flex;
   justify-content: flex-end;
@@ -556,7 +550,6 @@
   transform: translateY(0);
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .sidebar {
     width: 100vw;
@@ -648,7 +641,6 @@
   }
 }
 
-/* Скроллбар */
 .content::-webkit-scrollbar {
   width: 6px;
 }
@@ -666,9 +658,6 @@
   background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
 } 
 
-/* MDX компоненты - чистый дизайн без границ */
-
-/* Общие стили для блоков */
 .taskLayout {
   display: flex;
   flex-direction: column;
@@ -707,7 +696,6 @@
   gap: 8px;
 }
 
-/* Заголовки блоков */
 .blockHeader {
   margin-bottom: 16px;
 }

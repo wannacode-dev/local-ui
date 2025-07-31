@@ -34,7 +34,6 @@ body {
   color: var(--text-primary);
 }
 
-/* Улучшение touch интерфейсов */
 @media (hover: none) and (pointer: coarse) {
   button, 
   [role="button"], 
@@ -45,7 +44,6 @@ body {
   }
 }
 
-/* Общие стили для адаптивности */
 img, 
 video, 
 canvas, 
@@ -54,7 +52,6 @@ svg {
   height: auto;
 }
 
-/* Улучшение скроллбаров */
 * {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f8fafc;
@@ -84,7 +81,6 @@ svg {
   background: #f8fafc;
 }
 
-/* Мобильные скроллбары */
 @media (max-width: 768px) {
   *::-webkit-scrollbar {
     width: 4px;
@@ -96,14 +92,12 @@ svg {
   }
 }
 
-/* Анимации для плавного UI */
 @media (prefers-reduced-motion: no-preference) {
   * {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   }
 }
 
-/* Улучшение фокуса для accessibility */
 *:focus {
   outline: 2px solid #667eea;
   outline-offset: 2px;
@@ -116,13 +110,11 @@ svg {
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
-/* Скрытие outline для мышиного фокуса */
 *:focus:not(:focus-visible) {
   outline: none;
   box-shadow: none;
 }
 
-/* Улучшенная типографика */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.2;
@@ -136,7 +128,6 @@ p {
   margin: 0;
 }
 
-/* Кнопки */
 button {
   font-family: inherit;
   font-size: inherit;
@@ -152,7 +143,6 @@ button:active {
   transform: translateY(0);
 }
 
-/* Ссылки */
 a {
   color: #667eea;
   text-decoration: none;
@@ -163,7 +153,6 @@ a:hover {
   color: #4f46e5;
 }
 
-/* Выделение текста */
 ::selection {
   background: rgba(102, 126, 234, 0.2);
   color: var(--text-primary);
@@ -174,7 +163,6 @@ a:hover {
   color: var(--text-primary);
 }
 
-/* Адаптивная типографика */
 @media (max-width: 768px) {
   html {
     font-size: 14px;
@@ -187,7 +175,6 @@ a:hover {
   }
 }
 
-/* Предотвращение zoom на iOS при фокусе на input */
 @media screen and (max-width: 768px) {
   input[type="text"],
   input[type="email"],
@@ -199,7 +186,6 @@ a:hover {
   }
 }
 
-/* Улучшение производительности анимаций */
 .will-change-transform {
   will-change: transform;
 }
@@ -208,7 +194,6 @@ a:hover {
   will-change: auto;
 }
 
-/* Utility классы для адаптивности */
 .overflow-hidden {
   overflow: hidden;
 }
@@ -221,7 +206,6 @@ a:hover {
   overflow-y: auto;
 }
 
-/* Responsive utilities */
 @media (max-width: 480px) {
   .hide-mobile {
     display: none !important;
@@ -240,7 +224,6 @@ a:hover {
   }
 }
 
-/* Красивые input элементы */
 input, textarea, select {
   font-family: inherit;
   border: 2px solid var(--border-light);
@@ -257,7 +240,6 @@ input:focus, textarea:focus, select:focus {
   outline: none;
 }
 
-/* Красивые карточки */
 .card {
   background: var(--surface-gradient);
   border: 1px solid var(--border-light);
@@ -272,7 +254,6 @@ input:focus, textarea:focus, select:focus {
   transform: translateY(-2px);
 }
 
-/* Градиентный текст */
 .gradient-text {
   background: var(--primary-gradient);
   background-clip: text;
@@ -281,14 +262,12 @@ input:focus, textarea:focus, select:focus {
   font-weight: 600;
 }
 
-/* Стеклянный эффект */
 .glass {
   backdrop-filter: blur(20px);
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Loader анимация */
 @keyframes pulse {
   0%, 100% { 
     opacity: 0.4;
@@ -302,7 +281,6 @@ input:focus, textarea:focus, select:focus {
   animation: pulse 2s ease-in-out infinite;
 }
 
-/* Fade in анимация */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -318,14 +296,12 @@ input:focus, textarea:focus, select:focus {
   animation: fadeInUp 0.6s ease-out;
 }
 
-/* Улучшенный disabled state */
 [disabled] {
   opacity: 0.6;
   cursor: not-allowed;
   filter: grayscale(0.3);
 }
 
-/* Smooth transitions для темной темы (если потребуется) */
 @media (prefers-color-scheme: dark) {
   :root {
     --text-primary: #f1f5f9;

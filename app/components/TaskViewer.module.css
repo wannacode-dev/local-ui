@@ -121,10 +121,6 @@
   transform: scale(1.02);
 }
 
-
-
-
-
 .leftControls {
   display: flex;
   align-items: center;
@@ -237,7 +233,6 @@
   margin-bottom: 8px;
 }
 
-/* Исправление dropdown для мобильных - показывать снизу вверх */
 @media (max-width: 768px) {
   .dropdown {
     min-width: 260px;
@@ -337,10 +332,9 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
-  min-height: 0; /* Важно для правильной работы flex */
+  min-height: 0;
 }
 
-/* Браузерная панель */
 .browserContainer {
   flex: 1;
   display: flex;
@@ -397,7 +391,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   width: 100%;
   overflow: hidden;
-  min-width: 0; /* Позволяет сжиматься */
+  min-width: 0;
 }
 
 .addressTopic {
@@ -405,7 +399,7 @@
   font-weight: 700;
   color: #2563eb;
   white-space: nowrap;
-  flex-shrink: 1; /* Позволяем сжиматься при необходимости */
+  flex-shrink: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
@@ -427,7 +421,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
-  flex: 1; /* Занимает доступное место */
+  flex: 1;
 }
 
 .addressMode {
@@ -435,7 +429,7 @@
   font-weight: 500;
   color: #64748b;
   white-space: nowrap;
-  flex-shrink: 2; /* Сжимается первым при нехватке места */
+  flex-shrink: 2;
   overflow: hidden;
   text-overflow: ellipsis;
   font-style: italic;
@@ -446,7 +440,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap; /* Позволяем переносить кнопки на новую строку */
+  flex-wrap: wrap;
   min-width: 0;
 }
 
@@ -561,7 +555,6 @@
   font-size: 16px;
 }
 
-/* Анимация спиннера */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -575,7 +568,6 @@
   animation: spin 1s linear infinite;
 }
 
-/* Адаптивность */
 @media (max-width: 1440px) {
 
 }
@@ -649,7 +641,6 @@
 
 @media (max-width: 768px) {
   .container {
-    /* Убираем left: 0 чтобы синяя полоса оставалась */
     right: 0;
     border-left: none;
   }
@@ -659,7 +650,6 @@
     min-height: 44px;
     gap: 8px;
     flex-wrap: wrap;
-    /* Добавляем отступ слева чтобы кнопки не перекрывались с синей полосой */
     padding-left: 16px;
     justify-content: space-between;
   }
@@ -685,7 +675,6 @@
     flex: 1 1 100%;
     order: 3;
     margin-top: 6px;
-    /* Всегда показываем адресную строку на мобильных */
     display: flex !important;
   }
   
@@ -772,7 +761,6 @@
     padding: 6px 8px;
     min-height: 40px;
     gap: 6px;
-    /* Добавляем отступ слева для синей полосы */
     padding-left: 12px;
     flex-direction: column;
     align-items: stretch;
@@ -799,7 +787,6 @@
     padding: 3px 8px;
     margin-top: 4px;
     order: 2;
-    /* Всегда показываем адресную строку */
     display: flex !important;
     width: 100%;
   }
@@ -862,13 +849,11 @@
   }
 } 
 
-/* Новые адаптивные стили для браузерной панели */
 .browserButtonsHidden {
   display: none;
 }
 
 .addressBarCompact {
-  /* Компактный режим адресной строки вместо полного скрытия */
   min-height: 24px;
   padding: 4px 8px;
   font-size: 12px;
@@ -886,7 +871,6 @@
   font-size: 11px;
 }
 
-/* Специальные правила для мобильных экранов при открытом меню */
 @media (max-width: 768px) {
   .browserButtonsHidden {
     display: none !important;
@@ -902,7 +886,6 @@
   }
 }
 
-/* Адаптивность для средних экранов */
 @media (max-width: 1280px) {
   .addressBarHidden {
     display: none;
@@ -936,13 +919,11 @@
     flex-wrap: wrap;
   }
   
-  /* На средних экранах показываем кнопки браузера только если места достаточно */
   .browserButtonsHidden {
     display: none;
   }
 }
 
-/* Компактный режим при открытом описании на любых экранах */
 .browserControlsCompact .browserAction {
   padding: 6px 8px;
   font-size: 11px;
@@ -961,7 +942,6 @@
   justify-content: flex-end;
 }
 
-/* Активные состояния кнопок */
 .solutionActiveAction {
   background: #fbbf24 !important;
   color: #92400e !important;
@@ -986,7 +966,6 @@
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
-/* Красная кнопка сброса */
 .resetAction {
   background: #ef4444 !important;
   color: #ffffff !important;
@@ -998,7 +977,6 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* Кнопка сброса в футере */
 .footerActionButton.resetAction {
   background: #ef4444 !important;
   color: #ffffff !important;
@@ -1011,18 +989,17 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-/* Для больших экранов - показываем все элементы */
 @media (min-width: 1281px) {
   .addressBarHidden {
-    display: none !important; /* Полностью скрываем на больших экранах при нехватке места */
+    display: none !important;
   }
   
   .addressBarCompact {
-    display: flex; /* Компактный режим на больших экранах */
+    display: flex;
   }
   
   .browserButtonsHidden {
-    display: flex !important; /* Всегда показываем кнопки браузера на больших экранах */
+    display: flex !important;
   }
   
   .hiddenOnMedium {
@@ -1030,7 +1007,6 @@
   }
 }
 
-/* Для больших экранов при открытом описании - компактный режим */
 @media (min-width: 1281px) {
   .browserControlsCompact .browserAction {
     padding: 8px 12px;
