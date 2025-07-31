@@ -499,15 +499,15 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         <div className={styles.browserContainer}>
           {/* Браузерная панель */}
           <div className={styles.browserHeader}>
-            {/* Кнопки браузера */}
-            <div className={styles.browserButtons}>
+            {/* Кнопки браузера - скрываем на мобильных при открытом меню */}
+            <div className={`${styles.browserButtons} ${(!isDescriptionHidden || !sidebarHidden) ? styles.browserButtonsHidden : ''}`}>
               <div className={styles.browserDot} style={{ background: '#ff5f57' }}></div>
               <div className={styles.browserDot} style={{ background: '#ffbd2e' }}></div>
               <div className={styles.browserDot} style={{ background: '#28ca42' }}></div>
             </div>
             
-            {/* Адресная строка с информацией - скрываем на средних экранах при открытом описании или развернутом sidebar */}
-            <div className={`${styles.addressBar} ${(!isDescriptionHidden || !sidebarHidden) ? styles.addressBarHidden : ''}`}>
+            {/* Адресная строка с информацией - теперь адаптивная */}
+            <div className={`${styles.addressBar} ${(!isDescriptionHidden || !sidebarHidden) ? styles.addressBarCompact : ''}`}>
               <div className={styles.addressContent}>
                 <span className={styles.addressTopic}>
                   {formatBreadcrumbName(topic)}
@@ -522,7 +522,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               </div>
             </div>
             
-            {/* Кнопки управления - адаптируем для средних экранов */}
+            {/* Кнопки управления - адаптируем для разных экранов */}
             <div className={`${styles.browserControls} ${(!isDescriptionHidden || !sidebarHidden) ? styles.browserControlsCompact : ''}`}>
               {/* Обновить - скрываем при автообновлении */}
               {!autoRefresh && (

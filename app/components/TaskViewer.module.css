@@ -397,6 +397,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   width: 100%;
   overflow: hidden;
+  min-width: 0; /* Позволяет сжиматься */
 }
 
 .addressTopic {
@@ -404,7 +405,10 @@
   font-weight: 700;
   color: #2563eb;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1; /* Позволяем сжиматься при необходимости */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .addressSeparator {
@@ -423,6 +427,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+  flex: 1; /* Занимает доступное место */
 }
 
 .addressMode {
@@ -430,14 +435,19 @@
   font-weight: 500;
   color: #64748b;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 2; /* Сжимается первым при нехватке места */
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-style: italic;
+  min-width: 0;
 }
 
 .browserControls {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap; /* Позволяем переносить кнопки на новую строку */
+  min-width: 0;
 }
 
 .browserAction {
@@ -651,11 +661,17 @@
     flex-wrap: wrap;
     /* Добавляем отступ слева чтобы кнопки не перекрывались с синей полосой */
     padding-left: 16px;
+    justify-content: space-between;
   }
   
   .browserButtons {
     gap: 5px;
     padding-right: 10px;
+    order: 1;
+  }
+  
+  .browserButtonsHidden {
+    display: none;
   }
   
   .browserDot {
@@ -669,6 +685,14 @@
     flex: 1 1 100%;
     order: 3;
     margin-top: 6px;
+    /* Всегда показываем адресную строку на мобильных */
+    display: flex !important;
+  }
+  
+  .addressBarCompact {
+    min-height: 26px;
+    padding: 3px 8px;
+    font-size: 11px;
   }
   
   .addressTopic {
@@ -688,6 +712,7 @@
     gap: 4px;
     flex: 1 1 auto;
     justify-content: flex-end;
+    order: 2;
   }
   
   .browserAction {
@@ -749,11 +774,19 @@
     gap: 6px;
     /* Добавляем отступ слева для синей полосы */
     padding-left: 12px;
+    flex-direction: column;
+    align-items: stretch;
   }
   
   .browserButtons {
     gap: 4px;
     padding-right: 8px;
+    order: 1;
+    align-self: flex-start;
+  }
+  
+  .browserButtonsHidden {
+    display: none;
   }
   
   .browserDot {
@@ -765,6 +798,16 @@
     min-height: 26px;
     padding: 3px 8px;
     margin-top: 4px;
+    order: 2;
+    /* Всегда показываем адресную строку */
+    display: flex !important;
+    width: 100%;
+  }
+  
+  .addressBarCompact {
+    min-height: 24px;
+    padding: 2px 6px;
+    font-size: 10px;
   }
   
   .addressTopic {
@@ -777,6 +820,13 @@
   
   .addressMode {
     font-size: 11px;
+  }
+  
+  .browserControls {
+    order: 3;
+    margin-top: 4px;
+    justify-content: center;
+    width: 100%;
   }
   
   .browserAction {
@@ -812,6 +862,46 @@
   }
 } 
 
+/* Новые адаптивные стили для браузерной панели */
+.browserButtonsHidden {
+  display: none;
+}
+
+.addressBarCompact {
+  /* Компактный режим адресной строки вместо полного скрытия */
+  min-height: 24px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.addressBarCompact .addressTopic {
+  font-size: 12px;
+}
+
+.addressBarCompact .addressTask {
+  font-size: 12px;
+}
+
+.addressBarCompact .addressMode {
+  font-size: 11px;
+}
+
+/* Специальные правила для мобильных экранов при открытом меню */
+@media (max-width: 768px) {
+  .browserButtonsHidden {
+    display: none !important;
+  }
+  
+  .addressBarCompact {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .browserHeader {
+    align-items: flex-start;
+  }
+}
+
 /* Адаптивность для средних экранов */
 @media (max-width: 1280px) {
   .addressBarHidden {
@@ -820,6 +910,7 @@
   
   .browserControlsCompact {
     gap: 2px;
+    flex-wrap: wrap;
   }
   
   .browserControlsCompact .browserAction {
@@ -842,6 +933,12 @@
   .browserHeader {
     min-height: 44px;
     padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+  
+  /* На средних экранах показываем кнопки браузера только если места достаточно */
+  .browserButtonsHidden {
+    display: none;
   }
 }
 
@@ -917,7 +1014,15 @@
 /* Для больших экранов - показываем все элементы */
 @media (min-width: 1281px) {
   .addressBarHidden {
-    display: flex;
+    display: none !important; /* Полностью скрываем на больших экранах при нехватке места */
+  }
+  
+  .addressBarCompact {
+    display: flex; /* Компактный режим на больших экранах */
+  }
+  
+  .browserButtonsHidden {
+    display: flex !important; /* Всегда показываем кнопки браузера на больших экранах */
   }
   
   .hiddenOnMedium {
@@ -935,10 +1040,6 @@
   .browserControlsCompact {
     gap: 4px;
     justify-content: flex-end;
-  }
-  
-  /* Скрываем адресную строку на больших экранах при открытом описании */
-  .addressBarHidden {
-    display: none !important;
+    flex-wrap: wrap;
   }
 } 
