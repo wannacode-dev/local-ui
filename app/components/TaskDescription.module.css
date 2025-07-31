@@ -261,13 +261,13 @@
 .description h3 {
   font-size: 19px;
   font-weight: 600;
-  color: #475569;
+  color: #000000;
   margin: 24px 0 12px 0;
 }
 
 .description p {
   margin: 0 0 18px 0;
-  color: #64748b;
+  color: #000000;
   font-size: 15px;
   line-height: 1.7;
 }
@@ -294,8 +294,9 @@
 
 .description li {
   margin-bottom: 10px;
-  color: #64748b;
+  color: #38363f;
   line-height: 1.6;
+  font-style: italic;
 }
 
 .description li::marker {
@@ -706,15 +707,20 @@
 
 .blockTitle {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
-  color: #1e293b;
+  color: #000000;
   line-height: 1.3;
+  letter-spacing: -0.02em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .blockContent {
-  line-height: 1.7;
-  color: #475569;
+  line-height: 1.75;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* TaskObjective - цель задания */
@@ -723,10 +729,17 @@
 }
 
 .taskObjective .blockTitle {
-  color: #1e293b;
-  font-size: 20px;
-  font-weight: 600;
+  color: #000000;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.taskObjective .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 /* TaskConcepts - ключевые концепции */
@@ -735,10 +748,17 @@
 }
 
 .taskConcepts .blockTitle {
-  color: #1e293b;
-  font-size: 20px;
-  font-weight: 600;
+  color: #000000;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.taskConcepts .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 /* TaskImportant - важная информация */
@@ -747,10 +767,17 @@
 }
 
 .taskImportant .blockTitle {
-  color: #1e293b;
-  font-size: 20px;
-  font-weight: 600;
+  color: #dc2626;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.taskImportant .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 /* TaskHints - подсказки */
@@ -759,10 +786,17 @@
 }
 
 .taskHints .blockTitle {
-  color: #1e293b;
-  font-size: 20px;
-  font-weight: 600;
+  color: #059669;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.taskHints .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 .hintsContainer {
@@ -781,11 +815,14 @@
   background: #f1f5f9;
   padding: 16px;
   cursor: pointer;
-  font-weight: 500;
-  color: #475569;
+  font-weight: 600;
+  color: #334155;
   list-style: none;
   user-select: none;
   transition: all 0.2s ease;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .hintSummary:hover {
@@ -808,10 +845,17 @@
 }
 
 .taskLinks .blockTitle {
-  color: #1e293b;
-  font-size: 20px;
-  font-weight: 600;
+  color: #2563eb;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.taskLinks .blockContent {
+  color: #374151;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 .linksContainer {
@@ -834,20 +878,24 @@
 }
 
 .linkTitle {
-  font-weight: 600;
+  font-weight: 700;
   color: #1e40af;
   margin-bottom: 4px;
   font-size: 18px;
   display: flex;
   align-items: center;
   gap: 8px;
+  letter-spacing: -0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .linkDescription {
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.5;
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.6;
   font-style: italic;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* TaskPreview - предварительный просмотр */
@@ -859,10 +907,17 @@
 }
 
 .taskPreview .blockTitle {
-  color: #1e293b;
-  font-size: 20px;
-  font-weight: 600;
+  color: #0891b2;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.taskPreview .blockContent {
+  color: #374151;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 .taskPreview .preview {
@@ -883,10 +938,17 @@
 }
 
 .codeExample .blockTitle {
-  color: #1e293b;
-  font-size: 18px;
-  font-weight: 600;
+  color: #000000;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.codeExample .blockContent {
+  color: #374151;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 /* Solution - решение в виде раскрывающегося блока */
@@ -921,28 +983,93 @@
 }
 
 .success .blockTitle {
-  color: #1e293b;
-  font-size: 20px;
-  font-weight: 600;
+  color: #16a34a;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.success .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 /* Info - информационные блоки */
 .info {
-  background: #f8fafc;
-  padding: 20px;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  border: 1px solid #bfdbfe;
+  padding: 0;
+  border-radius: 12px;
+  margin: 16px 0;
+  color: #1e40af;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.info .blockTitle {
+  color: #2563eb;
+  font-size: 16px;
+  font-weight: 600;
   margin: 0;
-  color: #475569;
+  padding: 16px 20px 12px 20px;
+  background: rgba(59, 130, 246, 0.05);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.info .blockContent {
+  padding: 16px 20px 20px 20px;
+  color: #0f172a;
 }
 
 /* Warning - предупреждения */
 .warning {
-  background: #f8fafc;
-  padding: 20px;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+  border: 1px solid #fcd34d;
+  padding: 0;
+  border-radius: 12px;
+  margin: 16px 0;
+  color: #92400e;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.warning::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.warning .blockTitle {
+  color: #d97706;
+  font-size: 16px;
+  font-weight: 600;
   margin: 0;
-  color: #475569;
+  padding: 16px 20px 12px 20px;
+  background: rgba(245, 158, 11, 0.05);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.1);
+}
+
+.warning .blockContent {
+  padding: 16px 20px 20px 20px;
+  color: #0f172a;
 }
 
 /* Concept - концепции */
@@ -951,7 +1078,21 @@
   padding: 20px;
   border-radius: 8px;
   margin: 0;
-  color: #475569;
+  color: #1e293b;
+}
+
+.concept .blockTitle {
+  color: #ea580c;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.concept .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 /* Step - шаги */
@@ -960,7 +1101,21 @@
   padding: 20px;
   border-radius: 8px;
   margin: 0;
-  color: #475569;
+  color: #1e293b;
+}
+
+.step .blockTitle {
+  color: #0d9488;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.step .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 /* DocsExample - примеры из документации */
@@ -969,14 +1124,29 @@
   padding: 20px;
   border-radius: 8px;
   margin: 0;
-  color: #475569;
+  color: #1e293b;
+}
+
+.docsExample .blockTitle {
+  color: #3b82f6;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
+}
+
+.docsExample .blockContent {
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 .docsExample h3 {
-  color: #1e293b;
-  font-size: 18px;
-  font-weight: 600;
+  color: #3b82f6;
+  font-size: 20px;
+  font-weight: 700;
   margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
 }
 
 /* Стили для подсказок остаются для совместимости */
@@ -992,11 +1162,14 @@
   background: rgba(102, 126, 234, 0.1);
   padding: 16px;
   cursor: pointer;
-  font-weight: 500;
-  color: #475569;
+  font-weight: 600;
+  color: #334155;
   list-style: none;
   user-select: none;
   transition: all 0.2s ease;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .summary:hover {
@@ -1010,8 +1183,10 @@
 /* Стили для контента внутри блоков */
 .blockContent p {
   margin: 0 0 16px 0;
-  line-height: 1.7;
-  font-size: 15px;
+  line-height: 1.75;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .blockContent p:last-child {
@@ -1026,13 +1201,16 @@
 
 .blockContent li {
   margin: 8px 0;
-  line-height: 1.6;
-  font-size: 15px;
+  line-height: 1.7;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .blockContent strong {
-  font-weight: 600;
+  font-weight: 700;
   color: inherit;
+  letter-spacing: -0.01em;
 }
 
 .blockContent code {
@@ -1087,14 +1265,30 @@
   .taskPreview,
   .codeExample,
   .success,
-  .info,
-  .warning,
   .concept,
   .step,
   .docsExample {
     padding: 16px;
     margin: 0;
     border-radius: 6px;
+  }
+  
+  .info,
+  .warning {
+    margin: 12px 0;
+    border-radius: 8px;
+  }
+  
+  .info .blockTitle,
+  .warning .blockTitle {
+    font-size: 15px;
+    padding: 12px 16px 8px 16px;
+  }
+  
+  .info .blockContent,
+  .warning .blockContent {
+    padding: 12px 16px 16px 16px;
+    font-size: 14px;
   }
   
   .blockHeader {
