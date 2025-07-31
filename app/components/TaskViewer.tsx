@@ -47,7 +47,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Извлекаем информацию о пути задания
   const getTaskInfo = (taskFile: string) => {
     const parts = taskFile.split('/')
     let topic = ''
@@ -57,14 +56,10 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
       topic = parts[0]
       
       if (parts.length > 2) {
-        // Есть подпапка с заданием
         task = parts[1]
       } else {
-        // Извлекаем название задания из имени файла
         const fileName = parts[parts.length - 1]
-        // Убираем расширение и суффиксы .problem/.solution/.проблема/.решение
         let cleanName = fileName.replace(/\.(problem|solution|проблема|решение)\.(js|jsx|html|ts|tsx|css)$/, '')
-        // Если не нашли суффикс, просто убираем расширение
         if (cleanName === fileName) {
           cleanName = fileName.replace(/\.[^.]+$/, '')
         }
@@ -85,7 +80,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
 
   const { topic, task } = getTaskInfo(taskFile)
 
-  // Получаем плоский список всех заданий для навигации
   const getAllTasksFlat = () => {
     const flat: Task[] = []
     allTasks.forEach(chapter => {
@@ -104,12 +98,10 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const handlePreviousTask = () => {
     if (hasPreviousTask) {
       const previousTask = flatTasks[currentTaskIndex - 1]
-      // Находим индекс главы для нового задания
       const chapterIndex = allTasks.findIndex(chapter => 
         chapter.tasks.some(task => task.file === previousTask.file)
       )
       
-      // Обновляем URL с нужными параметрами
       const url = new URL(window.location.href)
       url.searchParams.set('task', previousTask.file)
       if (chapterIndex >= 0) {
@@ -124,12 +116,10 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const handleNextTask = () => {
     if (hasNextTask) {
       const nextTask = flatTasks[currentTaskIndex + 1]
-      // Находим индекс главы для нового задания
       const chapterIndex = allTasks.findIndex(chapter => 
         chapter.tasks.some(task => task.file === nextTask.file)
       )
       
-      // Обновляем URL с нужными параметрами
       const url = new URL(window.location.href)
       url.searchParams.set('task', nextTask.file)
       if (chapterIndex >= 0) {
@@ -141,7 +131,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     }
   }
 
-  // Загружаем список файлов задания
   const loadTaskFiles = async () => {
     try {
       console.log('Loading task files for:', taskFile)
@@ -159,15 +148,11 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     }
   }
 
-  // Проверяем существование файла решения
   const checkSolutionExists = async (taskFile: string) => {
-    // Получаем базовое имя файла без суффиксов problem/solution
     let baseName = taskFile
     
-    // Убираем все возможные суффиксы
     baseName = baseName.replace(/\.(problem|solution|проблема|решение)\./, '.')
     
-    // Создаем варианты файлов решений на основе базового имени
     const solutionVariants = []
     const extension = baseName.split('.').pop() || 'js'
     const nameWithoutExt = baseName.replace(/\.[^.]+$/, '')
@@ -183,7 +168,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
           return true
         }
       } catch {
-        // Продолжаем проверку следующего варианта
       }
     }
     
@@ -194,12 +178,10 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     try {
       let filePath = file
       
-      // Если файл из playground, сначала убедимся что он скопирован из src
       if (file.startsWith('playground/')) {
         const cleanFile = file.replace(/^playground\//, '')
         const srcFile = `src/${cleanFile}`
         
-        // Копируем файл из src в playground если его там нет
         await fetch('/api/playground', {
           method: 'POST',
           headers: {
@@ -208,9 +190,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
           body: JSON.stringify({ file: srcFile }),
         })
         
-        filePath = file // оставляем playground путь
+        filePath = file
       } else if (!file.startsWith('src/')) {
-        // Если это не playground и не src, добавляем src/ префикс
         filePath = `src/${file}`
       }
 
@@ -232,7 +213,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
       const result = await response.json()
       
       if (result.success && result.url) {
-        // Пытаемся открыть через vscode:// протокол
         window.location.href = result.url
         console.log('Successfully opened file in VS Code')
       } else {
@@ -247,7 +227,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   const handleOpenInNewWindow = async () => {
     let filePath = taskFile
     if (viewMode === 'solution') {
-      // Попробуем разные варианты решений
       const solutionVariants = []
       
       if (filePath.includes('.problem.')) {
@@ -258,7 +237,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         solutionVariants.push(filePath.replace('.проблема.', '.solution.'))
       }
       
-              // Найдем первый существующий файл решения
         for (const variant of solutionVariants) {
           try {
             const testPath = `src/${variant.replace(/^src\//, '')}`
@@ -268,7 +246,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               break
             }
           } catch {
-            // Продолжаем поиск
           }
         }
     }
@@ -287,7 +264,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     try {
       let filePath = taskFile
       if (viewMode === 'solution') {
-        // Попробуем разные варианты решений
         const solutionVariants = []
         
         if (filePath.includes('.problem.')) {
@@ -298,7 +274,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
           solutionVariants.push(filePath.replace('.проблема.', '.solution.'))
         }
         
-        // Найдем первый существующий файл решения
         for (const variant of solutionVariants) {
           try {
             const testPath = `src/${variant.replace(/^src\//, '')}`
@@ -308,7 +283,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               break
             }
           } catch {
-            // Продолжаем поиск
           }
         }
       }
@@ -339,14 +313,12 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     }
   }
 
-  // Тихое автообновление без лишних логов
   const silentRefresh = async () => {
     if (!taskFile) return
 
     try {
       let filePath = taskFile
       if (viewMode === 'solution') {
-        // Попробуем разные варианты решений
         const solutionVariants = []
         
         if (filePath.includes('.problem.')) {
@@ -357,7 +329,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
           solutionVariants.push(filePath.replace('.проблема.', '.solution.'))
         }
         
-        // Найдем первый существующий файл решения
         for (const variant of solutionVariants) {
           try {
             const testPath = `src/${variant.replace(/^src\//, '')}`
@@ -367,7 +338,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               break
             }
           } catch {
-            // Продолжаем поиск
           }
         }
       }
@@ -387,15 +357,12 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         }
       }
     } catch (error) {
-      // Тихо игнорируем ошибки при автообновлении
     }
   }
 
-  // Сброс файла к исходному состоянию
   const handleReset = async () => {
     if (!taskFile) return
 
-    // Запрашиваем подтверждение у пользователя
     if (!confirm('Вы уверены, что хотите сбросить файл к исходному состоянию? Все внесенные изменения будут потеряны.')) {
       return
     }
@@ -403,7 +370,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     try {
       let filePath = taskFile
       if (viewMode === 'solution') {
-        // Попробуем разные варианты решений
         const solutionVariants = []
         
         if (filePath.includes('.problem.')) {
@@ -414,7 +380,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
           solutionVariants.push(filePath.replace('.проблема.', '.solution.'))
         }
         
-        // Найдем первый существующий файл решения
         for (const variant of solutionVariants) {
           try {
             const testPath = `src/${variant.replace(/^src\//, '')}`
@@ -424,7 +389,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               break
             }
           } catch {
-            // Продолжаем поиск
           }
         }
       }
@@ -432,13 +396,11 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
       filePath = filePath.replace(/^src\//, '')
       const normalizedPath = `src/${filePath}`
       
-      // Сбрасываем файл через DELETE API
       const response = await fetch(`/api/playground?file=${encodeURIComponent(normalizedPath)}`, {
         method: 'DELETE'
       })
       
       if (response.ok) {
-        // Обновляем содержимое
         await handleRefresh()
         alert('Файл сброшен к исходному состоянию')
       } else {
@@ -450,12 +412,11 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
     }
   }
 
-  // Управление автообновлением
   useEffect(() => {
     if (autoRefresh && taskFile) {
       intervalRef.current = setInterval(() => {
         silentRefresh()
-      }, 5000) // Обновляем каждые 5 секунд
+      }, 5000)
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
@@ -475,7 +436,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
       handleRefresh()
       checkSolutionExists(taskFile).then(setHasSolution)
       loadTaskFiles()
-      // Закрываем выпадающее меню при смене задания
       setShowFilesDropdown(false)
     }
   }, [taskFile, viewMode])
@@ -483,7 +443,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
   return (
           <div className={styles.container}>
 
-      {/* Мобильная кнопка меню */}
       <motion.button
         className={styles.mobileMenuButton}
         onClick={onMobileMenuToggle}
@@ -494,19 +453,15 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         <Menu size={20} />
       </motion.button>
 
-      {/* Область результата */}
       <div className={styles.content}>
         <div className={styles.browserContainer}>
-          {/* Браузерная панель */}
           <div className={styles.browserHeader}>
-            {/* Кнопки браузера - скрываем на мобильных при открытом меню */}
             <div className={`${styles.browserButtons} ${(!isDescriptionHidden || !sidebarHidden) ? styles.browserButtonsHidden : ''}`}>
               <div className={styles.browserDot} style={{ background: '#ff5f57' }}></div>
               <div className={styles.browserDot} style={{ background: '#ffbd2e' }}></div>
               <div className={styles.browserDot} style={{ background: '#28ca42' }}></div>
             </div>
             
-            {/* Адресная строка с информацией - теперь адаптивная */}
             <div className={`${styles.addressBar} ${(!isDescriptionHidden || !sidebarHidden) ? styles.addressBarCompact : ''}`}>
               <div className={styles.addressContent}>
                 <span className={styles.addressTopic}>
@@ -522,9 +477,7 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               </div>
             </div>
             
-            {/* Кнопки управления - адаптируем для разных экранов */}
             <div className={`${styles.browserControls} ${(!isDescriptionHidden || !sidebarHidden) ? styles.browserControlsCompact : ''}`}>
-              {/* Обновить - скрываем при автообновлении */}
               {!autoRefresh && (
                 <motion.button
                   className={`${styles.browserAction} ${styles.refreshAction}`}
@@ -537,7 +490,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 </motion.button>
               )}
 
-              {/* Автообновление */}
               <motion.button
                 className={`${styles.browserAction} ${autoRefresh ? styles.autoActiveAction : styles.autoAction}`}
                 onClick={() => setAutoRefresh(!autoRefresh)}
@@ -548,10 +500,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 <span>{autoRefresh ? 'Авто ВКЛ' : 'Авто ВЫКЛ'}</span>
               </motion.button>
 
-              {/* Разделитель - скрываем на средних экранах при открытом описании */}
               <div className={styles.browserSeparator}></div>
 
-              {/* Посмотреть решение */}
               {hasSolution && (
                 <motion.button
                   className={`${styles.browserAction} ${styles.solutionAction} ${viewMode === 'solution' ? styles.solutionActiveAction : ''}`}
@@ -564,7 +514,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 </motion.button>
               )}
 
-              {/* Открыть в новом окне */}
               <motion.button
                 className={`${styles.browserAction} ${styles.newWindowAction}`}
                 onClick={handleOpenInNewWindow}
@@ -575,7 +524,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
                 <span>Новое окно</span>
               </motion.button>
 
-              {/* Показать/скрыть описание - всегда видна для управления */}
               <motion.button
                 className={`${styles.browserAction} ${styles.descriptionAction} ${!isDescriptionHidden ? styles.descriptionActiveAction : ''}`}
                 onClick={onToggleDescription}
@@ -588,7 +536,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
             </div>
           </div>
           
-          {/* Область контента браузера */}
           <div className={styles.browserContent}>
             {error && (
               <div className={styles.error}>
@@ -612,10 +559,8 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
         </div>
       </div>
 
-      {/* Footer с навигацией и файлами */}
       <div className={styles.footer}>
         <div className={styles.footerControls}>
-          {/* Левая группа: навигация + файлы */}
           <div className={styles.leftControls}>
             <div className={styles.navigationControls}>
               <motion.button 
@@ -640,7 +585,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
               </motion.button>
             </div>
 
-            {/* Кнопка файлов */}
             <div className={styles.filesButtonContainer}>
               <motion.button
                 className={styles.footerActionButton}
@@ -704,7 +648,6 @@ export default function TaskViewer({ taskFile, viewMode, onViewModeChange, allTa
             </div>
           </div>
 
-          {/* Кнопка сброса справа */}
           <motion.button
             className={`${styles.footerActionButton} ${styles.resetAction}`}
             onClick={handleReset}

@@ -11,7 +11,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import styles from './TaskDescription.module.css'
 
-// Импорт новых MDX компонентов
 import { 
   TaskLayout,
   TaskObjective,
@@ -41,7 +40,6 @@ interface CodeBlockProps {
   className?: string
 }
 
-// Компонент для блока кода с кнопкой копирования
 function CodeBlock({ children, className }: CodeBlockProps) {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState(false)
@@ -107,7 +105,6 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
       
       const content = await response.text()
       
-      // Сериализуем MDX с помощью next-mdx-remote
       const mdxSource = await serialize(content, {
         parseFrontmatter: true,
         mdxOptions: {
@@ -191,7 +188,6 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
                 <MDXRemote 
                   {...mdxSource}
                   components={{
-                    // Новые React компоненты для обучающих материалов
                     TaskLayout,
                     TaskObjective,
                     TaskImportant,
@@ -208,7 +204,6 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
                     Success,
                     DocsExample,
                     
-                    // Обратная совместимость со старыми div блоками
                     div: ({ className, children, ...props }) => {
                       if (className?.includes('task-preview')) {
                         return <TaskPreview>{children}</TaskPreview>
@@ -268,7 +263,6 @@ export default function TaskDescription({ taskFile, isHidden, onToggleHidden }: 
                         {children}
                       </summary>
                     ),
-                    // Интерактивный компонент для демонстрации
                     InteractiveExample: ({ title, children }) => (
                       <div className={styles.interactiveExample}>
                         <h4 className={styles.interactiveTitle}>🎯 {title}</h4>

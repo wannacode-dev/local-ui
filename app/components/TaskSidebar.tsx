@@ -30,12 +30,9 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Функция для красивого форматирования названий тем
   const formatChapterName = (chapterName: string): string => {
-    // Убираем номер в начале (например, "01-")
     const withoutNumber = chapterName.replace(/^\d+-/, '')
     
-    // Заменяем дефисы на пробелы и делаем первую букву каждого слова заглавной
     return withoutNumber
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -54,7 +51,6 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
     router.push(url.pathname + url.search, { scroll: false })
   }
 
-  // Инициализация состояния из URL
   useEffect(() => {
     const chapter = searchParams.get('chapter')
     
@@ -73,11 +69,9 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
     onTaskSelect(taskFile)
   }
 
-  // Функция для проверки, является ли задание выбранным (учитывает problem/solution)
   const isTaskSelected = (taskFile: string) => {
     if (!selectedTask) return false
     
-    // Нормализуем пути для сравнения (убираем все суффиксы типов заданий)
     const normalizeTaskFile = (file: string) => {
       return file.replace(/\.(problem|solution|проблема|решение)\./, '.PLACEHOLDER.')
     }
@@ -101,7 +95,6 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
                 <Code2 size={20} className={styles.logoIcon} />
                 <span className={styles.logoText}>
                   {(() => {
-                    // Находим название текущего задания
                     if (!selectedTask) return 'Курс'
                     
                     for (const chapter of tasks) {
@@ -159,7 +152,6 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
               title={isHidden ? formatChapterName(chapter.chapter) : undefined}
             >
               {isHidden ? (
-                // Свернутый вид - только иконка
                 <motion.span
                   className={styles.folderIconCollapsed}
                   animate={{
@@ -170,7 +162,6 @@ export default function TaskSidebar({ tasks, onTaskSelect, selectedTask, viewMod
                   {openChapter === chapterIndex ? <FolderOpen size={20} /> : <Folder size={20} />}
                 </motion.span>
               ) : (
-                // Развернутый вид - полный интерфейс
                 <>
                   <span className={styles.chapterContent}>
                     <motion.span

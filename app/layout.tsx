@@ -2,7 +2,7 @@ import React from 'react'
 import './globals.css'
 
 export const metadata = {
-  title: 'React Задания - Интерактивное обучение',  
+  title: 'React Задания - Интерактивное обучение',
   description: 'Интерактивные задания по React',
 }
 
